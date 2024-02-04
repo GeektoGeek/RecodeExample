@@ -1,0 +1,457 @@
+### This code is more or less clean. I have run this a couple of times, however, in cases it might throw some minor error, which is more syntactical than anything.
+
+### I have used multiple version of this code I wrote for the Lyft Analytics Assisgnment 
+
+setwd("~/LyftAnalyticsAssignment")
+install.packages("data.table")
+library(data.table)
+Driver <- fread("driver_ids.csv", sep = ",", header = TRUE)
+Ride <- fread("ride_ids.csv", sep = ",", header = TRUE)
+RideTS <- fread("ride_timestamps.csv", sep = ",", header = TRUE)
+View(RideTS)
+View(Ride)
+View(Driver)
+View(Ride)
+View(Ride)
+View(RideTS)
+install.packages("sqldf")
+library(sqldf)
+install.package("lubridate")
+library(lubridate)
+
+Combin<-sqldf("select s.driver_id, s.driver_onboard_date, m.driver_id, m.ride_id, m.ride_distance, m.ride_duration,m.ride_prime_time, d.ride_id, d.event, d.timestamp  from Driver s,
+Ride m, RideTS d where s.driver_id = m.driver_id and
+m.ride_id = d.ride_id;")
+
+View(Combin)
+write.csv(Combin[,1:10], "Combin.csv", row.names = FALSE)
+
+View(Driver)
+View(Driver)
+
+sqldf("select count(distinct(driver_id)) from Combin")
+sqldf("select count(distinct(driver_id)) from Driver")
+sqldf("select count(distinct(driver_id)) from Ride")
+sqldf("select count(distinct(ride_id)) from Ride")
+sqldf("select count(distinct(ride_id)) from RideTS")
+
+Combin1<-sqldf("select s.driver_id, s.driver_onboard_date, m.driver_id, m.ride_id, m.ride_distance, m.ride_duration,m.ride_prime_time, d.ride_id, d.event, d.timestamp  from Driver s
+inner join Ride m on s.driver_id = m.driver_id inner join RideTS d on
+m.ride_id = d.ride_id;")
+
+write.csv(Combin1[,1:10], "Combin1.csv", row.names = FALSE)
+
+## Trying out the left join step by step
+
+
+ComRideTS_Ride<-sqldf("select d.ride_id, d.event, d.timestamp, m.driver_id, m.ride_id, m.ride_distance, m.ride_duration, m.ride_prime_time from RideTS d left join Ride  m on m.ride_id = d.ride_id;")
+
+write.csv(ComRideTS_Ride[,1:8], "ComRideTS_Ride.csv", row.names = FALSE)
+
+View(ComRideTS_Ride)
+
+## Final Left Join
+
+ComRideTS_Ride_Driver<-sqldf("select * from ComRideTS_Ride a left join Driver b on a.driver_id = b.driver_id;")
+
+write.csv(ComRideTS_Ride_Driver[,1:10], "ComRideTS_Ride_Driver.csv", row.names = FALSE)
+
+
+
+### Begining of Questions 1.c
+
+library(lubridate)
+
+RideTS <- fread("ride_timestamps.csv", sep = ",", header = TRUE)
+
+
+## Changing the timestamp to date
+RideTS$timestamp<- ymd_hms(RideTS$timestamp,tz=Sys.timezone())
+
+
+### time elapsed between accepted_at and picked_up at
+
+timestamp_accepted<- sqldf("select ride_id, timestamp as timestamp_accepted from RideTS where event='accepted_at' group by ride_id")
+
+timestamp_pickedup<- sqldf("select ride_id, timestamp as timestamp_pickedup from RideTS where event='picked_up_at' group by ride_id")
+
+## let's join these two tables
+
+timestamp_join<- sqldf("select a.ride_id, a.timestamp_accepted, b.timestamp_pickedup from timestamp_accepted a inner join timestamp_pickedup b on a.ride_id= b.ride_id")
+
+str(timestamp_join)
+
+timestamp_join$timestamp_accepted1 <- timestamp_join$timestamp_accepted
+
+View(timestamp_join)
+
+timestamp_join1$timestamp_accepted1<- as.Date(timestamp_join1$timestamp_accepted1)
+
+View(timestamp_join1)
+
+View(timestamp_join)
+
+timestamp_join$timestamp_accepted1<- as.Date(timestamp_join$timestamp_accepted1)
+
+View(timestamp_join)
+str(timestamp_join)
+
+timestamp_join1<- timestamp_join
+timestamp_join1$timestamp_accepted<- ymd_hms(timestamp_join1$timestamp_accepted,tz=Sys.timezone())
+
+timestamp_join1$timestamp_pickedup<- ymd_hms(timestamp_join1$timestamp_pickedup,tz=Sys.timezone())
+
+ 
+
+View(timestamp_join1)
+
+## Do the difference; this will be in seconds
+
+AA<- as.integer(difftime(timestamp_join$timestamp_pickedup, timestamp_join$timestamp_accepted))
+
+AA1<- as.data.frame(AA)
+
+timestamp_join1 <- cbind(timestamp_join,AA1)
+
+ 
+View(timestamp_join1)
+
+ Elapsetime_Date1<- sqldf("select timestamp_accepted1, sum(AA) as Elaptimeasseconds from timestamp_join1 group by timestamp_accepted1")
+
+library(TTR)
+
+Elapsetime_Date1$MovingAvg<- SMA(Elapsetime_Date1$Elaptimeasseconds, n = 28)
+
+write.csv(Elapsetime_Date1[,1:3], "Elapsetime_Date1.csv", row.names = FALSE)
+
+### End of 1.c
+
+
+### Start of 1.a and 1.b
+
+### This has full Join data-set from Inner Join
+
+DF_pickup1<- sqldf("select driver_onboard_date, driver_id, ride_prime_time, ride_duration, ride_distance, ride_id, event as event_pickedup, timestamp as pickedup_timestamp from Combin where event='picked_up_at'")
+
+ 
+DF_droppoff1<- sqldf("select driver_onboard_date, driver_id, ride_prime_time, ride_duration, ride_distance, event as event_dropedoff, ride_id, timestamp as dropoff_timestamp from Combin where event='dropped_off_at'")
+
+DF_Join1<- sqldf("select a.*, b.event_dropedoff, b.dropoff_timestamp from DF_pickup1 a inner join DF_droppoff1 b on a.ride_id=b.ride_id")
+
+
+ ### Keep a copy of DFJoin1
+
+ DF_Join1Copy<- DF_Join1
+
+## Making sure to change it to a Date
+
+DF_Join1$driver_onboard_date<- ymd_hms(DF_Join1$driver_onboard_date,tz=Sys.timezone())
+
+DF_Join1$pickedup_timestamp <- ymd_hms(DF_Join1$pickedup_timestamp,tz=Sys.timezone())
+
+DF_Join1$dropoff_timestamp <- ymd_hms(DF_Join1$dropoff_timestamp,tz=Sys.timezone())
+
+str(DF_Join1)
+
+### Now make a copy of this one
+DF_Join1Copy<- DF_Join1
+
+
+write.csv(DF_Join1[,1:10], "DF_Join1.csv", row.names = FALSE)
+
+### Let's make the differences between max date and min date between Onboard date and dropoff date
+
+min(DF_Join1$driver_onboard_date)
+
+ max(DF_Join1$driver_onboard_date)
+
+min(DF_Join1$dropoff_timestamp)
+ max(DF_Join1$dropoff_timestamp)
+
+
+## Clearly the highest and lowest is 3 months
+
+### Do the differences in days
+
+BB_check<- as.numeric(difftime(DF_Join1$dropoff_timestamp,DF_Join1$driver_onboard_date, units = "days"))
+
+BB_check1<- as.data.frame(BB_check)
+
+BB_check1<- round(BB_check1, digits=0)
+
+View(BB_check1)
+
+DF_Join1 <- cbind(DF_Join1,BB_check1)
+
+### Column BB_check1 is the days between last_dropped and Driver_start_date
+peopleDf4 <- sqldf("SELECT *, 
+CASE 
+WHEN ((BB_Check) <= 7)  THEN 1
+WHEN ((BB_Check) <= 14) THEN 2
+WHEN ((BB_Check) <= 21) THEN 3
+WHEN ((BB_Check) <= 28) THEN 4
+WHEN ((BB_Check) <= 35) THEN 5
+WHEN ((BB_Check) <= 42) THEN 6
+WHEN ((BB_Check) <= 49) THEN 7
+WHEN ((BB_Check) <= 56) THEN 8
+WHEN ((BB_Check) <= 63) THEN 9
+WHEN ((BB_Check) <= 70) THEN 10
+WHEN ((BB_Check) <= 77) THEN 11
+WHEN ((BB_Check) <= 84) THEN 12
+WHEN ((BB_Check) <= 91) THEN 13
+WHEN ((BB_Check) <= 98) THEN 14
+WHEN ((BB_Check) <= 105) THEN 15
+WHEN ((BB_Check) <= 112) THEN 16
+END As 'Active_Week'
+FROM DF_Join1 group by driver_id")
+
+### Active_DriverPer Week
+
+ActiveDriverCount_perweek<-sqldf("select count(distinct(driver_id)) as count, Active_Week from peopleDf4 group by Active_Week order by count desc ")
+
+### Active_DriverPercent Per Week
+
+ActiveDriverCount_perweek$percent<- ((ActiveDriverCount_perweek$count)/837)*100
+
+write.csv(ActiveDriverCount_perweek[,1:3], "ActiveDriverCount_perweek.csv", row.names = FALSE)
+
+### Plot in GGplot
+
+ g + geom_bar(stat="identity", width = 0.5, fill="tomato2") + 
++     labs(title="Bar Chart", subtitle="Percent Drivers Per Active Week", 
++   caption="Source: Lyft Analytics Challenge dataset") +
++    theme(axis.text.x = element_text(angle=65, vjust=0.6))
+
+## Find Driver and Ride
+Driver_ride<- sqldf("select count(ride_id) as Numberofrides, driver_id from DF_Join1 group by driver_id")
+
+View(ActiveDriverCount_perweek)
+ 
+ ## Driver Active Week
+
+ View(peopleDf4)
+
+ Driver_Activeweek<- sqldf("select Active_Week, driver_id from peopleDf4")
+
+Dri_Ride_ActiveWeek<- sqldf("select a.driver_id, a.Numberofrides, b.Active_Week from Driver_ride a inner join Driver_Activeweek b on a.Driver_id= b.Driver_id order by Active_Week asc")
+
+ ### Dri_Ride_ActiveWeek-- This is the base table
+
+Fin_Dri_Ride_AW<- sqldf("select count(driver_id) as ActiveDriver, sum(Numberofrides) as Numrides, Active_Week as Weeks from Dri_Ride_ActiveWeek group by Active_Week order by Active_Week asc ")
+write.csv(Fin_Dri_Ride_AW[,1:3], "Fin_Dri_Ride_AW.csv", row.names = FALSE)
+
+End of 1.a and 1.b 
+
+
+
+#### Lifetime Value
+
+### Start of Problem #2
+
+## For this problem, start with the data set DF_Join1 
+
+###1. Provide an LTV formula
+
+###Projected CLV Calculation:
+###1. For each driver we have the Historical CLV (i.e., ###hisDriverRev )
+### 2.  Create column HistorialRevPerday  (i.e  ### hisDriverRev/Retention_in_days ) for specific driver
+###3.  Calculate the average and median retention days of  the ###driver in San Francisco Areas (columns W and X)
+###4.  Projected_CLV1_PerDriver = column Y* columnW
+###5. .  Projected_CLV1_PerDriver = column X* columnY
+
+##2. Provide breakdown of retention/productivity within LTV framework
+
+###Average retention 29 days
+### Median retention 24 days for San Francisco Lyft Drivers
+
+
+###What are the main factors that affect a driver’s lifetime value?
+
+### Factors including route, time of day, ride type, number of ### available drivers, current demand for rides, and any local ###fees or surcharges
+
+### Passengers may see higher ride costs when there’s more demand for rides. This might impact LTV
+
+## Prime time, i.e., shortage in drivers which also makes the area go into PT much quicker than before.
+
+### Strcuture the Data for problem #2
+
+## For this problem, start with the dataset DF_Join1 
+
+
+### Note BB_Check column is 'Rention in Days' between on_board date and last_drop_offtimestamp
+
+### It has to be build from different datasets
+
+CLV_DF1 <- sqldf("select driver_id, 
+sum(ride_prime_time) as sum_ridePT,
+max(ride_prime_time) as max_ridePT,
+min(ride_prime_time) as min_ridePT,
+avg(ride_prime_time) as avg_ride_PT, 
+median(ride_prime_time) as med_ride_PT,
+sum(ride_duration) as sum_ridedur,
+max(ride_duration) as max_ridedur, 
+min(ride_duration) as min_ridedur, 
+avg(ride_duration) as avg_ridedur, 
+median(ride_duration) as med_ridedur,
+sum(ride_distance) as sum_ridedis, 
+max(ride_distance) as max_ridedis, 
+min(ride_distance) as min_ridedis, 
+avg(ride_distance) as avg_ridedis, 
+median(ride_distance) as med_ridedis
+from DF_Join1 group by driver_id")
+
+CLV_DF2<- sqldf("select driver_id, BB_check as Retention_in_days, Active_Week from peopleDf4")
+
+## Join CLV_DF1 and CLV_DF2 for the estimated project CLV
+
+CLV_DF<- sqldf("select a.*, b.Retention_in_days, b.Active_Week from CLV_DF1 a inner join CLV_DF2 b on a.driver_id=b.driver_id")
+
+
+## Take the ride_id spreadsheet
+
+## Plug the Lyft rate Card
+
+## Note: There is no rate given for the prime time (Assumption)
+
+## Convert Meter to miles and sec to min
+
+## 1 meters= .000621 miles
+
+## Convert 
+
+ ##X sec= x/60 min
+
+## Assumption 1: ride_prime_time values are between 0 and 500
+
+##So it could max higher than 500% (e.g., 50% as noticed Lyft ##website)..but note, max fare could be only $400..So just adjust ## it after applying Prime time
+
+## Assumption 2: Safe ride fees are $1.00
+
+## There might be other fees such as Toll Fees etc., not included ##in the calculation
+
+
+##The Lyft fare equation:
+
+###Base Charge + (Cost per minute * time in ride) + (Cost per ###mile * ride distance) + Trust and Safety Fee + Other Fees + ###Tip (optional) = Your Fare
+
+
+library(data.table)
+
+histAmtpertrip <- fread("HistCLV_PerTrip1.csv", sep = ",", header = TRUE)
+ View(histAmtpertrip)
+
+ ###
+ 
+### Historical Amount Per Driver (i.e. roll it up from trip to driver)
+
+## This is essentially the historical Drivers' Lifetimevalue (at a high-level)
+
+
+Driverhistval<- sqldf("select sum(AmountPerTrip) as hisDriverRev, avg(AmountPerTrip) as avg_hisRevenue, 
++ median(AmountPerTrip) as med_hisRevenue, count(ride_id) as totalrides, driver_id from histAmtpertrip group by driver_id")
+
+
+
+## Now Join Driverhistval with CLV_DF
+
+CLV_project<- sqldf("select a.hisDriverRev, a.totalrides, b.* from Driverhistval a left join CLV_DF b on a.driver_id=b.driver_id")
+
+write.csv(CLV_project[,1:20], "CLV_project.csv", row.names = FALSE)
+
+
+
+### Restarting CLV Prediction using AutoML
+
+CLV_project1<- sqldf("select a.hisDriverRev, a.totalrides, b.* from Driverhistval a left join CLV_DF b on a.driver_id=b.driver_id")
+
+write.csv(CLV_project1[,1:20], "CLV_project.csv", row.names = FALSE)
+
+
+
+## Do Missing value Imputation
+
+
+install.packages("Amelia")
+install.packages("mice")
+library("Amelia")
+library("mice")
+
+imp.train_raw1 <- mice(CLV_project1, m=1, method='cart', printFlag=FALSE)
+
+CLV_Project_complete1 <- complete(imp.train_raw1)
+
+
+densityplot(imp.train_raw1, ~Retention_in_days)
+densityplot(imp.train_raw1, ~Active_Week)
+CLV_Project1_complete1 <- complete(imp.train_raw1)
+
+View(CLV_Project1_complete1)
+
+CLV_DF_Work1<- subset(CLV_Project_complete1, select= c(1,2,3,4,9,14,19)) 
+ 
+ View(CLV_DF_Work1)
+
+install.package("h2o")
+library(h2o)
+
+h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+
+ ind <- sample(1:nrow(CLV_DF_Work1),656)
+ trainDF3 <- CLV_DF_Work1[ind,]
+ testDF3 <-  CLV_DF_Work1[-ind,]
+ train_h2o3 <- as.h2o(trainDF3)
+ test_h2o3 <- as.h2o(testDF3)
+  
+ y <- "hisDriverRev"
+ 
+ x <- setdiff(names(train_h2o3), c(y,"driver_id"))
+ 
+ set.seed(1999)
+ automl_models_bal_h2o1 <- h2o.automl(
+    x = x,
+    y = y,
+     training_frame    = train_h2o3,
+    validation_frame  = test_h2o3,
+    max_runtime_secs  = 45
+)
+
+pred_bal_h2o3 <- h2o.predict( automl_models_bal_h2o1@leader, newdata = test_h2o3)
+  
+pred_bal_h2o3 <- h2o.predict( automl_models_bal_h2o1@leader, newdata = train_h2o3)
+  
+ pred_bal_h2o3_test <- h2o.predict( automl_models_bal_h2o1@leader, newdata = test_h2o3)
+  
+pred_bal_h2o3_train <- h2o.predict( automl_models_bal_h2o1@leader, newdata = train_h2o3)
+  
+pred_bal_h2o3_test<- as.data.frame(pred_bal_h2o3_test)
+pred_bal_h2o3_train<- as.data.frame(pred_bal_h2o3_train)
+test_bal_complete2<- cbind(testDF3,pred_bal_h2o3_test)
+View(test_bal_complete2)
+train_bal_complete2<- cbind(trainDF3,pred_bal_h2o3_train)
+final_predictedCLV_StackedEns <- rbind(train_bal_complete2,test_bal_complete2)
+View(final_predictedCLV_StackedEns)
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+

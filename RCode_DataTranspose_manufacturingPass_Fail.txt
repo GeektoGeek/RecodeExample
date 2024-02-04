@@ -1,0 +1,22 @@
+setwd("~/CodeForAllProjects/R/KnowData_Project/R&DWithPre-Burn-IN")
+Data<- read.csv("PreBurnIn_BurnIn_Confidential_modi.csv", sep=",")
+Data1<- Data
+Data2<- t(Data1)
+View(Data2)
+library(data.table)
+library(data.table)
+Data2<- t(Data1)
+t_Data1 <- transpose(Data1)
+colnames(t_Data1) <- rownames(Data1)
+rownames(t_Data1) <- colnames(Data1)
+View(t_Data1)
+write.csv(t_Data1[,1:101], "t_Data1.csv", row.names = FALSE)
+Data<- read.csv("t_Data1.csv", sep=",")
+View(Data)
+View(Data)
+Data1<- Data
+Data1$Pass_Fail<- as.factor(Data1$Pass_Fail)
+install.packages("corrr")  # though keep eye out for new version coming soon
+library(corrr)
+Data1 %>% correlate() %>% focus(Pass_Fail)
+savehistory("~/CodeForAllProjects/R/KnowData_Project/R&DWithPre-Burn-IN/RCode.Rhistory")

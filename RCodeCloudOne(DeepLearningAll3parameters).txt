@@ -1,0 +1,687 @@
+> setwd("~/CloudOne11-18")
+> Test <- read.csv("sales_db.csv", sep=",")
+> Test1<- as.data.frame(Test)
+
+> #### Important to remember when you apply a group by clause it is important to remember you can only take the aggregate function i.e. Min, Max, Count, Sum and Avg
+
+> summary(Test1)
+    deal_book_date         zip             age               year             make                    model        
+ 2016-05-31:   3943   Min.   :    2   Min.   : -18.00   Min.   :   0   Ford     : 274203   Altima        :  60331  
+ 2016-02-29:   3875   1st Qu.:31525   1st Qu.:   0.00   1st Qu.:2012   Chevrolet: 255234   Optima        :  54679  
+ 2016-03-01:   3836   Median :46143   Median :  30.00   Median :2014   Nissan   : 232688   F-150         :  47150  
+ 2016-03-31:   3690   Mean   :49682   Mean   :  28.06   Mean   :2006   Kia      : 226103   Soul          :  46404  
+ 2016-05-02:   3548   3rd Qu.:75840   3rd Qu.:  49.00   3rd Qu.:2016   Toyota   : 211752   Sonata        :  45334  
+ 2016-06-01:   3515   Max.   :99999   Max.   :6907.00   Max.   :7297   Honda    : 180650   Silverado 1500:  44520  
+ (Other)   :2510654                   NA's   :59                       (Other)  :1152431   (Other)       :2234643  
+   trade_year         trade_make              trade_model           term        amount_financed         apr        
+ Min.   :   0              :1400701                 :1401301   Min.   :  1.00   Min.   : -305606   Min.   :-100.0  
+ 1st Qu.:   0     Ford     : 112173   Altima        :  23765   1st Qu.: 36.00   1st Qu.:   13361   1st Qu.:   2.2  
+ Median :2004     Chevrolet: 104185   F-150         :  20261   Median : 60.00   Median :   21323   Median :   4.5  
+ Mean   :1292     Toyota   :  88320   Camry         :  19072   Mean   : 55.11   Mean   :   21803   Mean   :   6.2  
+ 3rd Qu.:2010     Nissan   :  86383   Silverado 1500:  17825   3rd Qu.: 72.00   3rd Qu.:   29453   3rd Qu.:   9.0  
+ Max.   :2068     (Other)  : 741241   (Other)       :1050820   Max.   :948.00   Max.   :38519613   Max.   : 167.0  
+ NA's   :814751   NA's     :     58   NA's          :     17                                       NA's   :327960  
+   deal_type         sale_type       vehicle_type    
+ P      :1042208   R      :740412   N      :1478188  
+ R      : 445095          :450210   U      :1044512  
+ L      : 407847   New    :360715   LEASE  :   2294  
+ D      : 272963   Used   :338185   Demo   :   1732  
+ Retail : 113889   Retail :186945   Spec   :   1162  
+ F      :  98610   Lease  :186124   Rent   :    988  
+ (Other): 152449   (Other):270470   (Other):   4185  
+
+> install.packages("sqldf")
+> # Take all numerical values similar to Boston Data Exaqmple
+>  Dart<- sqldf("select avg(term) as avg_term, avg(amount_financed) as avg_amt_fin, avg(apr) as avg_apr from Test group by zip")
+> DataFrame<- Dart
+> View(DataFrame)
+> hist(DataFrame$term)
+> hist(DataFrame$apr)
+> hist(DataFrame$amount_financed)
+> dim(DataFrame)
+> head(DataFrame, 3)
+  term amount_financed  apr
+1   72        22505.50 4.44
+2   72        16395.24 3.99
+3   36        10958.94   NA
+
+# Note, apr has NA values
+# Run the summary for all values
+> apply(DataFrame, 2, range)
+     term amount_financed apr
+[1,]    1        -23777.3  NA
+[2,]  240        231588.2  NA
+
+> summary(DataFrame$apr)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+  0.000   2.590   4.490   5.887   7.600  29.990    5543 
+> DataFrame$apr[which(is.na(DataFrame$apr))] <- 4.49
+> summary(DataFrame$apr)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00    2.99    4.49    5.62    6.49   29.99 
+   
+> maxValue<- apply(DataFrame, 2, max)
+> minValue<- apply(DataFrame, 2, min)
+> DataFrame <- as.data.frame(scale(DataFrame, center=minValue,scale=maxValue-minValue))
+> library(h2o)
+# start h2o
+> h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+
+H2O is not running yet, starting it now...
+
+Note:  In case of errors look at the following log files:
+    C:\Users\dsarkar\AppData\Local\Temp\Rtmpcv1h8C/h2o_dsarkar_started_from_r.out
+    C:\Users\dsarkar\AppData\Local\Temp\Rtmpcv1h8C/h2o_dsarkar_started_from_r.err
+
+java version "1.8.0_101"
+Java(TM) SE Runtime Environment (build 1.8.0_101-b13)
+Java HotSpot(TM) Client VM (build 25.101-b13, mixed mode)
+
+Starting H2O JVM and connecting: . Connection successful!
+
+R is connected to the H2O cluster: 
+    H2O cluster uptime:         2 seconds 141 milliseconds 
+    H2O cluster version:        3.14.0.3 
+    H2O cluster version age:    1 month and 27 days  
+    H2O cluster name:           H2O_started_from_R_dsarkar_xqh318 
+    H2O cluster total nodes:    1 
+    H2O cluster total memory:   1.18 GB 
+    H2O cluster total cores:    8 
+    H2O cluster allowed cores:  8 
+    H2O cluster healthy:        TRUE 
+    H2O Connection ip:          localhost 
+    H2O Connection port:        54321 
+    H2O Connection proxy:       NA 
+    H2O Internal Security:      FALSE 
+    H2O API Extensions:         Algos, AutoML, Core V3, Core V4 
+    R Version:                  R version 3.4.2 (2017-09-28) 
+
+Warning message:
+In .h2o.startJar(ip = ip, port = port, nthreads = nthreads, max_memory = max_mem_size,  :
+  You have a 32-bit version of Java. H2O works best with 64-bit Java.
+Please download the latest Java SE JDK 7 from the following URL:
+http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
+> y <- "apr"
+> x <- setdiff(colnames(DataFrame),y)
+> ind <- sample(1:nrow(DataFrame),23180)
+> trainDF <- DataFrame[ind,]
+> testDF <- DataFrame[-ind,]
+> model1 <- h2o.deeplearning(x=x, y=y, seed=1234, training_frame= as.h2o(trainDF), nfolds=3, stopping_rounds=7, epochs=400, overwrite_with_best_model=TRUE, activation= "Tanh", input_dropout_ratio= 0.1, hidden= c(10,10), l1=6e-4, loss="Automatic", distribution="AUTO", stopping_metric="MSE")
+  |===============================================================================================================| 100%
+  |===============================================================================================================| 100%
+> 
+> plot(model1)
+
+> prediction <- as.data.frame(predict(model1,as.h2o(testDF)))
+  |===============================================================================================================| 100%
+  |===============================================================================================================| 100%
+  
+> str(prediction)
+'data.frame':	5795 obs. of  1 variable:
+ $ predict: num  0.242 0.281 0.243 0.332 0.182 ...
+ 
+# So its a dataframe of whose predict column has to be accessed
+
+> sum((prediction$predict-testDF$medv)^2)/nrow(testDF)
+[1] 0
+> summary(model1)
+Model Details:
+==============
+
+H2ORegressionModel: deeplearning
+Model Key:  DeepLearning_model_R_1511067048507_1 
+Status of Neuron Layers: predicting apr, regression, gaussian distribution, Quadratic loss, 151 weights/biases, 5.3 KB, 9,300,359 training samples, mini-batch size 1
+  layer units   type dropout       l1       l2 mean_rate rate_rms momentum mean_weight weight_rms mean_bias bias_rms
+1     1     2  Input 10.00 %                                                                                        
+2     2    10   Tanh  0.00 % 0.000600 0.000000  0.010102 0.020629 0.000000   -0.318897   1.608896  0.772716 1.034807
+3     3    10   Tanh  0.00 % 0.000600 0.000000  0.318461 0.274898 0.000000   -0.063943   0.389711  0.322037 0.806685
+4     4     1 Linear         0.000600 0.000000  0.064608 0.064808 0.000000   -0.015946   0.715131 -0.592065 0.000000
+
+H2ORegressionMetrics: deeplearning
+** Reported on training data. **
+** Metrics reported on temporary training frame with 10035 samples **
+
+MSE:  0.0224876
+RMSE:  0.1499586
+MAE:  0.1069353
+RMSLE:  0.1151551
+Mean Residual Deviance :  0.0224876
+
+
+
+H2ORegressionMetrics: deeplearning
+** Reported on cross-validation data. **
+** 3-fold cross-validation on training data (Metrics computed for combined holdout predictions) **
+
+MSE:  0.0223475
+RMSE:  0.1494908
+MAE:  0.1064087
+RMSLE:  0.1147163
+Mean Residual Deviance :  0.0223475
+
+
+Cross-Validation Metrics Summary: 
+                              mean           sd  cv_1_valid cv_2_valid cv_3_valid
+mae                      0.1064033 4.6267977E-4  0.10732865 0.10594313 0.10593811
+mean_residual_deviance 0.022347514 1.0903956E-4 0.022297021 0.02255649 0.02218903
+mse                    0.022347514 1.0903956E-4 0.022297021 0.02255649 0.02218903
+r2                      0.17404479 0.0064191585  0.18680376 0.16643113 0.16889948
+residual_deviance      0.022347514 1.0903956E-4 0.022297021 0.02255649 0.02218903
+rmse                    0.14948995 3.6441963E-4  0.14932187 0.15018818 0.14895983
+rmsle                   0.11471728 1.2228721E-4  0.11450044 0.11492367 0.11472775
+
+Scoring History: 
+            timestamp          duration training_speed    epochs iterations        samples training_rmse
+1 2017-11-18 20:54:22         0.000 sec                  0.00000          0       0.000000              
+2 2017-11-18 20:54:22        42.971 sec 278451 obs/sec   4.31251          1   99964.000000       0.15343
+3 2017-11-18 20:54:27        48.051 sec 368613 obs/sec  86.28555         20 2000099.000000       0.15133
+4 2017-11-18 20:54:32        53.090 sec 382628 obs/sec 172.56238         40 3999996.000000       0.15023
+5 2017-11-18 20:54:37        58.240 sec 384817 obs/sec 258.83016         60 5999683.000000       0.15006
+6 2017-11-18 20:54:42  1 min  3.309 sec 372932 obs/sec 332.19586         77 7700300.000000       0.15103
+7 2017-11-18 20:54:47  1 min  7.915 sec 368462 obs/sec 401.22343         93 9300359.000000       0.14996
+  training_deviance training_mae
+1                               
+2           0.02354      0.11044
+3           0.02290      0.10874
+4           0.02257      0.10614
+5           0.02252      0.10643
+6           0.02281      0.10504
+7           0.02249      0.10694
+
+Variable Importances: (Extract with `h2o.varimp`) 
+=================================================
+
+Variable Importances: 
+         variable relative_importance scaled_importance percentage
+1            term            1.000000          1.000000   0.574377
+2 amount_financed            0.741016          0.741016   0.425623
+
+> plot(testDF$apr,prediction$predict,col='blue', main='Real vs Predicted', pch=1, cex=0.9, type="p", xlab="Actual", ylab="Predicted")
+> abline(0,1,col="black")
+
+> h2o.shutdown(prompt=FALSE)
+[1] TRUE
+  
+ ######-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#####
+### Starting from scratch again
+## Asuming H2O is still running
+
+ Dart2<- sqldf("select max(term) as max_term, min(term) as min_term, avg(term) as avg_term, count(term) as count_term, sum(term) as sum_term, max(amount_financed) as max_amtfin, min(amount_financed) as min_amtfin, avg(amount_financed) as avg_amtfin, sum(amount_financed) as sum_amtfin, count(amount_financed) as count_amtfin, avg(apr) as avg_apr, max(apr) as max_apr, min(apr) as min_apr from Test group by Zip")
+> View(Dart2)
+> View(Dart2) 
+> DataFrame<- Dart2
+> dim(DataFrame)
+[1] 28975    11
+> head(DataFrame, 3)
+
+  max_term min_term avg_term count_term sum_term max_amtfin min_amtfin avg_amtfin sum_amtfin count_amtfin avg_apr
+1       72       72 72.00000          2      144   22505.50   22416.00   22460.75   44921.50            2    3.49
+2       75       36 61.84615         26     1608   43233.83    7523.70   22757.65  591698.84           26    5.91
+3       36       36 36.00000          1       36   10958.94   10958.94   10958.94   10958.94            1      NA
+
+> head(DataFrame, 3)
+  max_term min_term avg_term count_term sum_term max_amtfin min_amtfin avg_amtfin sum_amtfin count_amtfin avg_apr
+1       72       72 72.00000          2      144   22505.50   22416.00   22460.75   44921.50            2    3.49
+2       75       36 61.84615         26     1608   43233.83    7523.70   22757.65  591698.84           26    5.91
+3       36       36 36.00000          1       36   10958.94   10958.94   10958.94   10958.94            1      NA
+> apply(DataFrame, 2, range)
+     max_term min_term avg_term count_term sum_term max_amtfin min_amtfin avg_amtfin sum_amtfin count_amtfin avg_apr
+[1,]        1        1        1          1        1     -10927  -305605.6     -10927     -10927            1      NA
+[2,]      948      240      240       5931   323193   38519613   123899.0     123899  107610594         5931      NA
+
+> summary(DataFrame$avg_apr)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+ -2.188   3.851   5.411   5.960   7.404  28.000    1288 
+> DataFrame$avg_apr[which(is.na(DataFrame$avg_apr))] <- 5.411
+  
+> DataFrame$avg_apr[which(is.na(DataFrame$avg_apr))] <- 5.411
+> DataFrame$min_apr[which(is.na(DataFrame$min_apr))] <- 0
+> DataFrame$max_apr[which(is.na(DataFrame$max_apr))] <- 15.36
+
+> maxValue<- apply(DataFrame, 2, max)
+> minValue<- apply(DataFrame, 2, min)
+> DataFrame <- as.data.frame(scale(DataFrame, center=minValue,scale=maxValue-minValue))   
+> library(h2o)
+> h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+> y <- "avg_apr"
+> x <- setdiff(colnames(DataFrame),y) 
+> ind <- sample(1:nrow(DataFrame),23180)
+> trainDF <- DataFrame[ind,]
+> testDF <- DataFrame[-ind,]
+> set.seed(123)
+ model <- h2o.deeplearning(x=x, y=y, seed=1234, training_frame= as.h2o(trainDF), nfolds=3, stopping_rounds=7, epochs=500, overwrite_with_best_model=TRUE, activation= "Rectifier", input_dropout_ratio= 0.1, hidden= c(25,25), l1=6e-4, loss="Automatic", distribution="AUTO", stopping_metric="MSE")
+ 
+
+> model
+
+Model Details:
+==============
+
+H2ORegressionModel: deeplearning
+Model ID:  DeepLearning_model_R_1511503853639_2 
+Status of Neuron Layers: predicting avg_apr, regression, gaussian distribution, Quadratic loss, 1,001 weights/biases, 16.8 KB, 11,600,627 training samples, mini-batch size 1
+  layer units      type dropout       l1       l2 mean_rate rate_rms momentum mean_weight weight_rms mean_bias bias_rms
+1     1    12     Input 10.00 %                                                                                        
+2     2    25 Rectifier  0.00 % 0.000600 0.000000  0.009314 0.019632 0.000000   -0.004244   0.327570 -0.047740 0.219553
+3     3    25 Rectifier  0.00 % 0.000600 0.000000  0.206423 0.169840 0.000000   -0.024559   0.317396  0.117014 0.231591
+4     4     1    Linear         0.000600 0.000000  0.074709 0.096983 0.000000   -0.042748   0.495253  0.087217 0.000000
+
+
+H2ORegressionMetrics: deeplearning
+** Reported on training data. **
+** Metrics reported on temporary training frame with 10035 samples **
+
+MSE:  0.001758671
+RMSE:  0.04193651
+MAE:  0.02780606
+RMSLE:  0.03179825
+Mean Residual Deviance :  0.001758671
+
+
+
+H2ORegressionMetrics: deeplearning
+** Reported on cross-validation data. **
+** 3-fold cross-validation on training data (Metrics computed for combined holdout predictions) **
+
+MSE:  0.001862105
+RMSE:  0.04315211
+MAE:  0.02793781
+RMSLE:  0.03265117
+Mean Residual Deviance :  0.001862105
+
+
+Cross-Validation Metrics Summary: 
+                               mean           sd   cv_1_valid   cv_2_valid   cv_3_valid
+mae                     0.027936583 4.0660036E-4  0.028307801   0.02712438  0.028377566
+mean_residual_deviance 0.0018619095  1.940654E-5 0.0018983224 0.0018320662 0.0018553399
+mse                    0.0018619095  1.940654E-5 0.0018983224 0.0018320662 0.0018553399
+r2                       0.85302126  0.002560402   0.84968674   0.85805416    0.8513229
+residual_deviance      0.0018619095  1.940654E-5 0.0018983224 0.0018320662 0.0018553399
+rmse                     0.04314868 2.2459732E-4   0.04356974  0.042802643  0.043073658
+rmsle                    0.03264904 1.4671212E-4  0.032923732  0.032422353  0.032601036
+
+> # note mse and r2 are the key items to look for
+
+> 8.091325E-4
+
+> prediction <- as.data.frame(predict(model,as.h2o(testDF)))
+> plot(testDF$avg_apr,prediction$predict,col='blue', main='Real vs Predicted', pch=1, cex=0.9, type="p", xlab="Actual", ylab="Predicted")
+> abline(0,1,col="black")
+
+> h2o.shutdown(prompt=FALSE)
+[1] TRUE
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+##### Repeat the same example for Average Amount Financed
+
+> Dart3<- sqldf("select max(term) as max_term, min(term) as min_term, avg(term) as avg_term, max(amount_financed) as max_amtfin, min(amount_financed) as min_amtfin, avg(amount_financed) as avg_amtfin, sum(amount_financed) as sum_amtfin, count(amount_financed) as count_amtfin, avg(apr) as avg_apr, max(apr) as max_apr, min(apr) as min_apr, count(apr) as count_apr, sum(apr) as sum_apr from Test group by Zip")
+> DataFrame1<- Dart3
+> apply(DataFrame1, 2, range)
+     max_term min_term avg_term max_amtfin min_amtfin avg_amtfin sum_amtfin count_amtfin avg_apr max_apr min_apr
+[1,]        1        1        1     -10927  -305605.6     -10927     -10927            1      NA      NA      NA
+[2,]      948      240      240   38519613   123899.0     123899  107610594         5931      NA      NA      NA
+     count_apr sum_apr
+[1,]         0      NA
+[2,]      5072      NA
+> DataFrame$avg_apr[which(is.na(DataFrame$avg_apr))] <- 5.411
+> DataFrame$min_apr[which(is.na(DataFrame$min_apr))] <- 0
+> DataFrame$max_apr[which(is.na(DataFrame$max_apr))] <- 15.36
+> DataFrame1$avg_apr[which(is.na(DataFrame$avg_apr))] <- 5.411
+> DataFrame1$avg_apr[which(is.na(DataFrame1$avg_apr))] <- 5.411
+> DataFrame1$max_apr[which(is.na(DataFrame1$max_apr))] <- 15.36
+> DataFrame1$min_apr[which(is.na(DataFrame1$min_apr))] <- 0
+> summary(DataFrame1$count_apr)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    0.0     2.0     8.0    76.1    45.0  5072.0 
+> summary(DataFrame1$sum_apr)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+  -37.20    11.98    51.39   494.41   292.44 54623.91     1288 
+> DataFrame1$sum_apr[which(is.na(DataFrame1$sum_apr))] <- 51.39
+> maxValue<- apply(DataFrame1, 2, max)
+> minValue<- apply(DataFrame1, 2, min)
+> DataFrame1 <- as.data.frame(scale(DataFrame1, center=minValue,scale=maxValue-minValue))   
+> library(h2o)
+> h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+
+H2O is not running yet, starting it now...
+
+Note:  In case of errors look at the following log files:
+    C:\Users\dsarkar\AppData\Local\Temp\RtmpWa0PUU/h2o_dsarkar_started_from_r.out
+    C:\Users\dsarkar\AppData\Local\Temp\RtmpWa0PUU/h2o_dsarkar_started_from_r.err
+
+java version "1.8.0_151"
+Java(TM) SE Runtime Environment (build 1.8.0_151-b12)
+Java HotSpot(TM) Client VM (build 25.151-b12, mixed mode)
+
+Starting H2O JVM and connecting: . Connection successful!
+
+R is connected to the H2O cluster: 
+    H2O cluster uptime:         2 seconds 163 milliseconds 
+    H2O cluster version:        3.14.0.3 
+    H2O cluster version age:    2 months and 1 day  
+    H2O cluster name:           H2O_started_from_R_dsarkar_tmx990 
+    H2O cluster total nodes:    1 
+    H2O cluster total memory:   1.18 GB 
+    H2O cluster total cores:    8 
+    H2O cluster allowed cores:  8 
+    H2O cluster healthy:        TRUE 
+    H2O Connection ip:          localhost 
+    H2O Connection port:        54321 
+    H2O Connection proxy:       NA 
+    H2O Internal Security:      FALSE 
+    H2O API Extensions:         Algos, AutoML, Core V3, Core V4 
+    R Version:                  R version 3.4.2 (2017-09-28) 
+
+Warning message:
+In .h2o.startJar(ip = ip, port = port, nthreads = nthreads, max_memory = max_mem_size,  :
+  You have a 32-bit version of Java. H2O works best with 64-bit Java.
+Please download the latest Java SE JDK 7 from the following URL:
+http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
+> y <- "avg_amtfin"
+> x <- setdiff(colnames(DataFrame1),y) 
+> ind <- sample(1:nrow(DataFrame1),23180)
+> trainDF1 <- DataFrame1[ind,]
+> testDF1 <- DataFrame1[-ind,]
+>  model1 <- h2o.deeplearning(x=x, y=y, seed=1234, training_frame= as.h2o(trainDF1), nfolds=3, stopping_rounds=7, epochs=500, overwrite_with_best_model=TRUE, activation= "Rectifier", input_dropout_ratio= 0.1, hidden= c(25,25), l1=6e-4, loss="Automatic", distribution="AUTO", stopping_metric="MSE")
+  |===============================================================================================================| 100%
+  |===============================================================================================================| 100%
+> model1
+Model Details:
+==============
+
+H2ORegressionModel: deeplearning
+Model ID:  DeepLearning_model_R_1511549735817_1 
+Status of Neuron Layers: predicting avg_amtfin, regression, gaussian distribution, Quadratic loss, 1,001 weights/biases, 16.8 KB, 11,600,627 training samples, mini-batch size 1
+  layer units      type dropout       l1       l2 mean_rate rate_rms momentum mean_weight weight_rms mean_bias bias_rms
+1     1    12     Input 10.00 %                                                                                        
+2     2    25 Rectifier  0.00 % 0.000600 0.000000  0.008176 0.027331 0.000000    0.028414   0.486726 -0.075788 0.235078
+3     3    25 Rectifier  0.00 % 0.000600 0.000000  0.233576 0.195913 0.000000   -0.053327   0.657516  0.035280 0.161701
+4     4     1    Linear         0.000600 0.000000  0.073750 0.088046 0.000000   -0.096164   1.409638  0.013138 0.000000
+
+
+H2ORegressionMetrics: deeplearning
+** Reported on training data. **
+** Metrics reported on temporary training frame with 10035 samples **
+
+MSE:  0.0001972044
+RMSE:  0.01404295
+MAE:  0.009597596
+RMSLE:  0.01111705
+Mean Residual Deviance :  0.0001972044
+
+
+
+H2ORegressionMetrics: deeplearning
+** Reported on cross-validation data. **
+** 3-fold cross-validation on training data (Metrics computed for combined holdout predictions) **
+
+MSE:  0.0008045318
+RMSE:  0.02836427
+MAE:  0.009010558
+RMSLE:  0.01412357
+Mean Residual Deviance :  0.0008045318
+
+
+Cross-Validation Metrics Summary: 
+                              mean           sd   cv_1_valid   cv_2_valid   cv_3_valid
+mae                    0.009006561 4.0581834E-4  0.009758659  0.008366264  0.008894759
+mean_residual_deviance 8.091325E-4    5.8716E-4 2.5351933E-4 1.9098094E-4 0.0019828973
+mse                    8.091325E-4    5.8716E-4 2.5351933E-4 1.9098094E-4 0.0019828973
+r2                      0.83587384   0.11806759    0.9464934   0.96123606   0.59989214
+residual_deviance      8.091325E-4    5.8716E-4 2.5351933E-4 1.9098094E-4 0.0019828973
+rmse                   0.024757203  0.009904883   0.01592229  0.013819585  0.044529736
+rmsle                  0.013851755  0.001998252  0.012615381 0.0111786565  0.017761229
+
+# Note MSE in this case 8.091325E-4= .0008091
+> prediction <- as.data.frame(predict(model1,as.h2o(testDF1)))
+> plot(testDF1$avg_amtfin,prediction$predict,col='blue', main='Real vs Predicted', pch=1, cex=0.9, type="p", xlab="Actual", ylab="Predicted")
+>  abline(0,1,col="black")
+> h2o.shutdown(prompt=FALSE)
+[1] TRUE
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## Repeat the same thing for Avg APR
+
+> Dart4<- sqldf("select max(term) as max_term, min(term) as min_term, avg(term) as avg_term, sum(term) as sum_term, count(term) as count_term, max(amount_financed) as max_amtfin, min(amount_financed) as min_amtfin, avg(amount_financed) as avg_amtfin, sum(amount_financed) as sum_amtfin, count(amount_financed) as count_amtfin, avg(apr) as avg_apr, max(apr) as max_apr, min(apr) as min_apr from Test group by Zip")
+> DataFrame2<- Dart4
+> apply(DataFrame2, 2, range)
+     max_term min_term avg_term sum_term count_term max_amtfin min_amtfin avg_amtfin sum_amtfin count_amtfin avg_apr max_apr min_apr
+[1,]        1        1        1        1          1     -10927  -305605.6     -10927     -10927            1      NA      NA      NA
+[2,]      948      240      240   323193       5931   38519613   123899.0     123899  107610594         5931      NA      NA      NA
+> summary(DataFrame2$avg_apr)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+ -2.188   3.851   5.411   5.960   7.404  28.000    1288 
+> DataFrame2$avg_apr[which(is.na(DataFrame2$avg_apr))] <- 5.411
+> DataFrame2$min_apr[which(is.na(DataFrame2$min_apr))] <- 0
+> DataFrame2$max_apr[which(is.na(DataFrame2$max_apr))] <- 15.36
+> maxValue<- apply(DataFrame2, 2, max)
+> minValue<- apply(DataFrame2, 2, min)
+> DataFrame2 <- as.data.frame(scale(DataFrame2, center=minValue,scale=maxValue-minValue))  
+> library(h2o)
+> h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+
+H2O is not running yet, starting it now...
+
+Note:  In case of errors look at the following log files:
+    C:\Users\dsarkar\AppData\Local\Temp\RtmpWa0PUU/h2o_dsarkar_started_from_r.out
+    C:\Users\dsarkar\AppData\Local\Temp\RtmpWa0PUU/h2o_dsarkar_started_from_r.err
+
+java version "1.8.0_151"
+Java(TM) SE Runtime Environment (build 1.8.0_151-b12)
+Java HotSpot(TM) Client VM (build 25.151-b12, mixed mode)
+
+Starting H2O JVM and connecting: . Connection successful!
+
+R is connected to the H2O cluster: 
+    H2O cluster uptime:         2 seconds 145 milliseconds 
+    H2O cluster version:        3.14.0.3 
+    H2O cluster version age:    2 months and 1 day  
+    H2O cluster name:           H2O_started_from_R_dsarkar_ncy346 
+    H2O cluster total nodes:    1 
+    H2O cluster total memory:   1.18 GB 
+    H2O cluster total cores:    8 
+    H2O cluster allowed cores:  8 
+    H2O cluster healthy:        TRUE 
+    H2O Connection ip:          localhost 
+    H2O Connection port:        54321 
+    H2O Connection proxy:       NA 
+    H2O Internal Security:      FALSE 
+    H2O API Extensions:         Algos, AutoML, Core V3, Core V4 
+    R Version:                  R version 3.4.2 (2017-09-28) 
+
+Warning message:
+In .h2o.startJar(ip = ip, port = port, nthreads = nthreads, max_memory = max_mem_size,  :
+  You have a 32-bit version of Java. H2O works best with 64-bit Java.
+Please download the latest Java SE JDK 7 from the following URL:
+http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
+> y1 <- "avg_apr"
+> x1 <- setdiff(colnames(DataFrame2),y1) 
+> ind <- sample(1:nrow(DataFrame2),23180)
+> trainDF2 <- DataFrame2[ind,]
+> testDF2 <-  DataFrame2[-ind,]
+> model3 <- h2o.deeplearning(x=x1, y=y1, seed=1234, training_frame= as.h2o(trainDF2), nfolds=3, stopping_rounds=7, epochs=500, overwrite_with_best_model=TRUE, activation= "Rectifier", input_dropout_ratio= 0.1, hidden= c(25,25), l1=6e-4, loss="Automatic", distribution="AUTO", stopping_metric="MSE")
+  |==================================================================================================================================| 100%
+  |==================================================================================================================================| 100%
+> 
+> model3
+Model Details:
+==============
+
+H2ORegressionModel: deeplearning
+Model ID:  DeepLearning_model_R_1511553152330_1 
+Status of Neuron Layers: predicting avg_apr, regression, gaussian distribution, Quadratic loss, 1,001 weights/biases, 16.8 KB, 11,600,627 training samples, mini-batch size 1
+  layer units      type dropout       l1       l2 mean_rate rate_rms momentum mean_weight weight_rms mean_bias bias_rms
+1     1    12     Input 10.00 %                                                                                        
+2     2    25 Rectifier  0.00 % 0.000600 0.000000  0.022169 0.061676 0.000000    0.001835   0.280783 -0.024620 0.214304
+3     3    25 Rectifier  0.00 % 0.000600 0.000000  0.201769 0.167898 0.000000   -0.025861   0.318691  0.105577 0.241132
+4     4     1    Linear         0.000600 0.000000  0.046578 0.072236 0.000000    0.028265   0.473723 -0.031383 0.000000
+
+
+H2ORegressionMetrics: deeplearning
+** Reported on training data. **
+** Metrics reported on temporary training frame with 10035 samples **
+
+MSE:  0.001846167
+RMSE:  0.04296704
+MAE:  0.02874653
+RMSLE:  0.03264499
+Mean Residual Deviance :  0.001846167
+
+
+
+H2ORegressionMetrics: deeplearning
+** Reported on cross-validation data. **
+** 3-fold cross-validation on training data (Metrics computed for combined holdout predictions) **
+
+MSE:  0.001927041
+RMSE:  0.04389808
+MAE:  0.02925747
+RMSLE:  0.03329566
+Mean Residual Deviance :  0.001927041
+
+
+Cross-Validation Metrics Summary: 
+                               mean           sd  cv_1_valid   cv_2_valid  cv_3_valid
+mae                     0.029255867 2.0346123E-4 0.029583788  0.028883243 0.029300569
+mean_residual_deviance 0.0019273176 2.3900033E-5 0.001885056 0.0019291065  0.00196779
+mse                    0.0019273176 2.3900033E-5 0.001885056 0.0019291065  0.00196779
+r2                        0.8487978 0.0016340027   0.8514863   0.84906244  0.84584457
+residual_deviance      0.0019273176 2.3900033E-5 0.001885056 0.0019291065  0.00196779
+rmse                    0.043899536 2.7231392E-4  0.04341723  0.043921594  0.04435978
+rmsle                    0.03329683 1.9926851E-4  0.03292126   0.03336915 0.033600084
+> plot(model3)
+  |==================================================================================================================================| 100%
+>  prediction1 <- as.data.frame(predict(model3,as.h2o(testDF2)))
+  |==================================================================================================================================| 100%
+  |==================================================================================================================================| 100%
+  
+  sum(prediction1$predict-testDF2$avg_apr)^2/nrow(testDF2)
+  
+> plot(testDF2$avg_apr,prediction1$predict,col='blue', main='Real vs Predicted', pch=1, cex=0.9, type="p", xlab="Actual", ylab="Predicted")
+> abline(0,1,col="black")
+>  h2o.shutdown(prompt=FALSE)
+[1] TRUE
+> 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+### Making an attempt to integrate zip code in the output
+DataFramr4 <- sqldf("select max(term) as max_term, min(term) as min_term, avg(term) as avg_term, sum(term) as sum_term, count(term) as count_term, max(amount_financed) as max_amtfin, min(amount_financed) as min_amtfin, avg(amount_financed) as avg_amtfin, sum(amount_financed) as sum_amtfin, count(amount_financed) as count_amtfin, avg(apr) as avg_apr, max(apr) as max_apr, min(apr) as min_apr,zip from Test group by Zip")
+> View(DataFrame4)
+> DataFrame5<- DataFrame4
+>  maxValue<- apply(DataFrame5, 2, max)
+>  minValue<- apply(DataFrame5, 2, min) 
+>  DataFrame5 <- as.data.frame(scale(DataFrame5, center=minValue,scale=maxValue-minValue))  
+> trainDF4<- DataFrame5[ind,]
+> testDF4 <-  DataFrame5[-ind,]
+> y1 <- "avg_apr" 
+# Note here we are eliminiting multiple columns as predictors including zip code
+> x1 <- setdiff(names(trainDF4), c(y1, "zip"))
+model4 <- h2o.deeplearning(x=x1, y=y1, seed=123, training_frame= as.h2o(trainDF4), nfolds=3, stopping_rounds=7, epochs=500, variable_importances=TRUE, overwrite_with_best_model=TRUE, activation= "Rectifier", input_dropout_ratio= 0.1, hidden= c(30,30), l1=6e-4, loss="Automatic", distribution="AUTO", stopping_metric="MSE")
+
+
+Model Details:
+==============
+
+H2ORegressionModel: deeplearning
+Model ID:  DeepLearning_model_R_1511651437208_4 
+Status of Neuron Layers: predicting avg_apr, regression, gaussian distribution, Quadratic loss, 1,351 weights/biases, 21.0 KB, 11,602,027 training samples, mini-batch size 1
+  layer units      type dropout       l1       l2 mean_rate rate_rms momentum mean_weight weight_rms mean_bias bias_rms
+1     1    12     Input 10.00 %                                                                                        
+2     2    30 Rectifier  0.00 % 0.000600 0.000000  0.019865 0.038139 0.000000    0.010444   0.270646 -0.012650 0.135382
+3     3    30 Rectifier  0.00 % 0.000600 0.000000  0.223770 0.190683 0.000000   -0.026602   0.258910  0.143031 0.265851
+4     4     1    Linear         0.000600 0.000000  0.094407 0.094930 0.000000    0.136991   0.660054  1.112790 0.000000
+
+
+H2ORegressionMetrics: deeplearning
+** Reported on training data. **
+** Metrics reported on temporary training frame with 10005 samples **
+
+MSE:  0.00183762
+RMSE:  0.04286747
+MAE:  0.02807047
+RMSLE:  0.03234975
+Mean Residual Deviance :  0.00183762
+
+
+
+H2ORegressionMetrics: deeplearning
+** Reported on cross-validation data. **
+** 3-fold cross-validation on training data (Metrics computed for combined holdout predictions) **
+
+MSE:  0.001882855
+RMSE:  0.04339188
+MAE:  0.02845273
+RMSLE:  0.03283459
+Mean Residual Deviance :  0.001882855
+
+
+Cross-Validation Metrics Summary: 
+                              mean           sd   cv_1_valid   cv_2_valid  cv_3_valid
+mae                    0.028449055 3.0762158E-4  0.029021177  0.027967036 0.028358947
+mean_residual_deviance  0.00188292 1.8989309E-5 0.0018744001 0.0019192322 0.001855128
+mse                     0.00188292 1.8989309E-5 0.0018744001 0.0019192322 0.001855128
+r2                      0.85229677  0.004180883    0.8455629   0.85137063   0.8599568
+residual_deviance       0.00188292 1.8989309E-5 0.0018744001 0.0019192322 0.001855128
+rmse                   0.043391526 2.1847036E-4   0.04329434   0.04380904 0.043071195
+rmsle                  0.032834534 1.0768163E-4  0.032797415  0.033036813 0.032669373
+
+> ## Ploting the training model with time..i.e. epochs
+
+> plot(model4)
+### Let's append the predicted column from the model equation in the training data-set
+## First run the prediction on the same data-set
+prediction3 <- as.data.frame(predict(model4,as.h2o(trainDF4)))
+## Next a create a new data-set binding the predict column with the previous training data-set
+> trainDF5 <- cbind(trainDF4,prediction3)
+> View(trainDF5)
+
+### Calculate the error on the training data-set and compare it with the model generated mse
+sum(prediction1$predict-trainDF4$avg_apr)^2/nrow(trainDF4)
+0.002815446
+
+### In this case, it is .0028 close .0018 the model output showed
+
+> ### Lets run the prediction on the test data-set
+prediction4 <- as.data.frame(predict(model4,as.h2o(testDF4)))
+> ## Let's calculate the error in this case
+> sum(prediction4$predict-testDF4$avg_apr)^2/nrow(testDF4)
+[1] 0.005779345
+> ###  Clearly outof sample error in this case is only .5%
+> #### Let's append the predicted value from the model equation in a separate test data-set
+> testDF5 <- cbind(testDF4,prediction1)
+View(testDF5)
+> ### Calculate the training and test using h2o functions
+> h2o.performance(model4, train=T) 
+ 
+H2ORegressionMetrics: deeplearning
+** Reported on training data. **
+** Metrics reported on temporary training frame with 10005 samples **
+
+MSE:  0.00183762
+RMSE:  0.04286747
+MAE:  0.02807047
+RMSLE:  0.03234975
+Mean Residual Deviance :  0.00183762
+
+> ## To check the performance on the test data set, we need to change dataframe testDF4 to a H2o frame first
+> newdata<- as.h2o(testDF4)
+> h2o.performance(model4, newdata = newdata)
+
+H2ORegressionMetrics: deeplearning
+
+MSE:  0.002236219
+RMSE:  0.04728868
+MAE:  0.0286767
+RMSLE:  0.03415611
+Mean Residual Deviance :  0.002236219
+
+> ### Lets convert the zip to actual values for training and testing data-sets
+> View(trainDF5)
+> trainDF5$zip1<- trainDF5$zip
+> trainDF5$zip1<- trainDF5$zip1*(maxValue["zip1"]-minValue["zip1"])+minValue["zip1"]
+> View(trainDF5)
+> testDF5$zip1<- testDF5$zip
+> View(testDF5)
+> testDF5$zip1<- testDF5$zip1*(maxValue["zip1"]-minValue["zip1"])+minValue["zip1"]
+> View(testDF2)
+> View(testDF5)

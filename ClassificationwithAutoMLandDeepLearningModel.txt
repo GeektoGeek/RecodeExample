@@ -1,0 +1,267 @@
+> setwd("C:/Users/dansa/Desktop/ZestFinancial")
+> trainX <- read.csv("trainX.csv", sep=",")
+> trainY <- read.csv("trainY.csv", sep=",")
+> testX <-  read.csv("testX.csv", sep=",")
+> testY <-  read.csv("testY.csv", sep=",")
+> install.packages("sqldf")
+> library(sqldf)
+> train<- sqldf("select a.*, b.FullyFunded from trainX a join trainY b on a.customer_id=b.customer_id")
+> test<- sqldf("select a.*, b.FullyFunded from testX a join testY b on a.customer_id=b.customer_id")
+> train2<- subset(train1, select=c(3,4,5,7,9,12,13,14,15,16,17,18,19))
+> test1<- test
+> test2<- subset(test1, select=c(3,4,5,7,9,12,13,14,15,16,17,18,19))
+> View(test2)
+
+> train2$residence_rent_or_own <- factor(ifelse(train2$residence_rent_or_own,"yes","no"))
+> View(train2)
+> train2$bank_account_direct_deposit <- factor(ifelse(train2$bank_account_direct_deposit,"yes","no"))
+> View(train2)
+> train2$FullyFunded <- factor(ifelse(train2$FullyFunded,"yes","no"))
+> View(train2)
+> library(plyr)
+> train2$bank_account_direct_deposit <- mapvalues(train2$bank_account_direct_deposit,from = c("yes","no"), to = c(1,0))
+> View(train2)
+> train2$FullyFunded <- mapvalues(train2$FullyFunded,from = c("yes","no"), to = c(1,0))
+> View(train2)
+> View(train2)
+> train2$home_phone_type <- mapvalues(train2$home_phone_type,from = c("Home","Mobile","Work"), to = c(0,1,2))
+> View(train2)
+> View(train2)
+
+test2<- subset(test1, select=c(3,4,5,7,9,12,13,14,15,16,17,18,19))
+ View(test2)
+ test2$residence_rent_or_own <- factor(ifelse(test2$residence_rent_or_own,"yes","no"))
+ View(test2)
+ test2$bank_account_direct_deposit <- factor(ifelse(test2$bank_account_direct_deposit,"yes","no"))
+ View(test2)
+ test2$FullyFunded <- factor(ifelse(test2$FullyFunded,"yes","no"))
+ View(test2)
+ library(plyr)
+ test2$bank_account_direct_deposit <- mapvalues(test2$bank_account_direct_deposit,from = c("yes","no"), to = c(1,0))
+ View(test2)
+ test2$FullyFunded <- mapvalues(test2$FullyFunded,from = c("yes","no"), to = c(1,0))
+ View(test2)
+ View(test2)
+ test2$home_phone_type <- mapvalues(test2$home_phone_type,from = c("Home","Mobile","Work"), to = c(0,1,2))
+ View(test2)
+ # Unbalanced data set
+ train2$FullyFunded %>% table() %>% prop.table()
+
+### Use GGPlot to do some exploration loan duration and payment based on the target
+
+### https://www.mailman.columbia.edu/sites/default/files/media/fdawg_ggplot2.html
+
+scatter <- ggplot(data=train2, aes(x = loan_duration, y = num_payments)) 
+> scatter + geom_point(aes(color=FullyFunded, shape=FullyFunded)) +
+  xlab("loan_duration") +  ylab("num_payments") + ggtitle("loan values")
+
+
+
+
+> library(unbalanced)
+> library(tidyquant)
+
+> input  <- train2 %>% select(-FullyFunded)
+> output <- train2$FullyFunded
+> train_balanced <- ubSMOTE(input, output, perc.over = 150, perc.under = 200, k = 7)
+> train_df <- bind_cols(as.tibble(train_balanced$X), tibble(FullyFunded = train_balanced$Y))
+> train_df$FullyFunded %>% table() %>% prop.table()
+
+> split_pct <- 0.85
+> n <- nrow(train_df)
+> sample_size <- floor(split_pct * n)
+> set.seed(159)
+> idx_train <- sample(1:n, size = sample_size)
+> valid_raw_df <- train_df[-idx_train,]
+> train_raw_df <- train_df[idx_train,]
+>library(h2o)
+>h2o.init(ip="localhost", port=54321, max_mem_size="4900m")
+
+> train_h2o <- as.h2o(train_raw_df)
+> valid_h2o <- as.h2o(valid_raw_df)
+> test_h2o <- as.h2o(test2)
+
+ # Automatic Machine Learning Model
+> y <- "FullyFunded"
+> x <- setdiff(names(train_h2o), y)
+> 
+> automl_models_h2o <- h2o.automl
+	(
+	x = x, 
+	y = y,
+	training_frame    = train_h2o,
+	validation_frame  = valid_h2o,
+	max_runtime_secs  = 75
+        )
+
+> ### Extract our leader model.
+
+> automl_leader <- automl_models_h2o@leader
+
+> pred_h2o <- h2o.predict(automl_leader, newdata = valid_h2o)
+
+> as.tibble(pred_h2o)
+
+> perf_h2o <- h2o.performance(automl_leader, newdata = test_h2o) 
+
+> plot(perf_h2o)
+
+# Getting performance metrics
+h2o.metric(perf_h2o) %>%   as.tibble() %>%    glimpse()
+
+##> # AUC Calculation
+> h2o.auc(perf_h2o)
+
+> # predictions are based on p1_cutoff
+> as.tibble(pred_h2o)
+
+> # Algorithm uses p1_cutoff that maximizes F1
+> h2o.F1(perf_h2o) %>% as.tibble() %>% filter(f1 == max(f1))
+
+# Full list of thresholds at various performance metrics
+perf_h2o@metrics$max_criteria_and_metric_scores
+
+
+# Plot recall and precision vs threshold, visualize inventory strategy effect
+> left_join(h2o.recall(perf_h2o), h2o.precision(perf_h2o)) %>%
++     rename(recall = tpr) %>%
++     gather(key = key, value = value, -threshold) %>%
++     ggplot(aes(x = threshold, y = value, color = key)) +
++     geom_point(alpha = 0.5) +
++     scale_color_tq() +
++     theme_tq() +
++     labs(title = 'Precision and Recall vs Cutoff ("Yes" Threshold)',
++          subtitle = "As the cutoff increases from zero, inventory strategy becomes more conservative",
++          caption = "Deciding which cutoff to call YES is highly important! Don't just blindly use 0.50.",
++          x = 'Cutoff (Probability above which we predict went_on_backorder = "Yes")',
++          y = "Precision and Recall Values"
++     ) +
++     # p>=0
++     geom_vline(xintercept = 0, color = palette_light()[[3]], size = 1) +
++     annotate("text", x = 0.12, y = 0.75, size = 3,
++              label = 'p1 >= 0: "Yes"\nInventory\nEverything') +
++     geom_segment(x = 0, y = 0.7, xend = 0.02, yend= 0.72, color = palette_light()[[3]], size = 1) +
++     # p>=0.25
++     geom_vline(xintercept = 0.25, color = palette_light()[[3]], size = 1) +
++     annotate("text", x = 0.37, y = 0.35, size = 3,
++              label = 'p1 >= 0.25: "Yes"\nInventory Anything\nWith Chance\nof Backorder') +
++     geom_segment(x = 0.25, y = 0.30, xend = 0.27, yend= 0.32, color = palette_light()[[3]], size = 1) +
++     # p>=0.5
++     geom_vline(xintercept = 0.5, color = palette_light()[[3]], size = 1) +
++     annotate("text", x = 0.62, y = 0.75, size = 3,
++              label = 'p1 >= 0.50: "Yes"\nInventory\nProbability\nSplit 50/50') +
++     geom_segment(x = 0.5, y = 0.70, xend = 0.52, yend= 0.72, color = palette_light()[[3]], size = 1) +
++     # p>=0.75
++     geom_vline(xintercept = 0.75, color = palette_light()[[3]], size = 1) +
++     annotate("text", x = 0.87, y = 0.75, size = 3,
++              label = 'p1 >= 0.75: "Yes"\nInventory Very\nConservatively\n(Most Likely Backorder)') +
++     geom_segment(x = 0.75, y = 0.70, xend = 0.77, yend= 0.72, color = palette_light()[[3]], size = 1) +
++     # p>=1
++     geom_vline(xintercept = 1, color = palette_light()[[3]], size = 1) +
++     annotate("text", x = 0.87, y = 0.22, size = 3,
++              label = 'p1 >= 1.00: "Yes"\nInventory Nothing') +
++     geom_segment(x = 1.00, y = 0.23, xend = 0.98, yend= 0.21, color = palette_light()[[3]], size = 1) 
+
+
+
+#### Let's run a deep learning model
+
+> ### Applying a Deeplearning model
+> dl_model <- h2o.deeplearning(
+	x = x,
+	y = y,
+        model_id = "dl_model",
+        training_frame = train_h2o,
+        validation_frame = valid_h2o,
+        nfolds = 15,                                   # 10x cross validation
+        keep_cross_validation_fold_assignment = TRUE,
+        fold_assignment = "Stratified",
+        activation = "RectifierWithDropout",
+        score_each_iteration = TRUE,
+        hidden = c(200, 200, 200, 200, 200),           # 5 hidden layers, each of 200 neurons
+        epochs = 100,
+        variable_importances = TRUE,
+        export_weights_and_biases = TRUE,
+        seed = 42)
+
+#### Because training can take a while, depending on how many samples, features, nodes and hidden layers you are training on, it is a good idea to save your model.
+
+> h2o.saveModel(dl_model, path = "dl_model")
+### We can then re-load the model again any time to check the model quality and make predictions on new data.
+
+> dl_model <- h2o.loadModel("dl_model/dl_model")
+
+#### We now want to know how our model performed on the validation data. The summary() function will give us a detailed overview of our model. 
+####I am not showing the output here, because it is quite extensive.
+
+> summary(dl_model)
+
+#### One performance metric we are usually interested in is the mean per class error for training and validation data.
+
+> h2o.mean_per_class_error(dl_model, train = TRUE, valid = TRUE, xval = TRUE)
+
+###     train      valid       xval 
+###     0.10383065 0.07386364 0.19858871 
+
+#### The confusion matrix tells us, how many classes have been predicted correctly and how many predictions were accurate. Here, we see the errors in predictions on validation data
+> h2o.confusionMatrix(dl_model, valid = TRUE)
+#### Confusion Matrix (vertical: actual; across: predicted)  for max f1 @ threshold = 0.680301946486463:
+#####        0      1          Error        Rate
+#####     0  83     5         0.056818      =5/88
+####      1  8      80        0.090909      =8/88
+####Totals   91     85        0.073864     =13/176
+
+
+#### We can also plot the classification error over all epochs or samples.
+
+plot(dl_model,
+     timestep = "epochs",
+     metric = "classification_error")
+
+ plot(dl_model,
+       timestep = "samples",
+        metric = "classification_error")
+
+####  Next to the classification error, we are usually interested in the logistic loss (negative log-likelihood or log loss). 
+#### It describes the sum of errors for each sample in the training or validation data or the negative logarithm of the likelihood of error for a given prediction/ classification. 
+### Simply put, the lower the loss, the better the model (if we ignore potential overfitting).
+
+plot(dl_model,
+     timestep = "epochs",
+     metric = "logloss")
+
+#### We can also plot the mean squared error (MSE). The MSE tells us the average of the prediction errors squared, i.e. the estimator’s variance and bias. The closer to zero, the better a model.
+
+plot(dl_model,
+     timestep = "epochs",
+     metric = "rmse")
+
+### Next, we want to know the area under the curve (AUC). AUC is an important metric for measuring binary classification model performances. 
+### It gives the area under the curve, i.e. the integral, of true positive vs false positive rates. The closer to 1, the better a model.
+> h2o.auc(dl_model, train = TRUE)
+### [1] 0.9551188
+
+> h2o.auc(dl_model, valid = TRUE)
+### [1] 0.9562242
+
+> h2o.auc(dl_model, xval = TRUE)
+### [1] 0.8805931
+
+### Variable importance can be extracted as well (but keep in mind, that variable importance in deep neural networks is difficult to assess and should be considered only as rough estimates).
+
+> h2o.varimp(dl_model)
+> h2o.varimp_plot(dl_model)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

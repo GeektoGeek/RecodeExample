@@ -1,0 +1,415 @@
+setwd("~/CodeForAllProjects/R/SparkCognitionDataScienceAssignment")
+
+##### Load the data
+
+SparktrainDF<- read.csv("marketing_training.csv", sep=",")
+View(SparktrainDF)
+SparktestDF<- read.csv("marketing_test.csv", sep=",")
+
+## Adding an id with autoincrement values to match the format of training with test dataset
+
+## Change the X cloumn to id to match the test with training dataset
+colnames(SparktestDF)[colnames(SparktestDF) == 'X'] <- 'id'
+
+SparktrainDF$id <- seq.int(nrow(SparktrainDF))
+summary(SparktrainDF)
+summary(SparktrainDF$custAge)
+summary(SparktrainDF$schooling)
+summary(SparktrainDF$day_of_week)
+
+### Filling the blank values of schooling and day_of_week with NA
+
+SparktrainDF$schooling[grepl("^\\s*$", SparktrainDF$schooling)] <- NA
+View(SparktrainDF)
+SparktrainDF$day_of_week[grepl("^\\s*$", SparktrainDF$day_of_week)] <- NA
+View(SparktrainDF)
+
+#### ### Preprocess the missing values for training dataset
+library(Amelia)
+library(mice)
+library(ggplot2)
+library(lattice)
+imp.train_raw <- mice(SparktrainDF, m=1, method='cart', printFlag=FALSE)
+
+### XPlot and density distribution suggest the imputation follows similar pattern of the true variable
+xyplot(imp.train_raw, custAge ~ schooling)
+densityplot(imp.train_raw, ~custAge)
+densityplot(imp.train_raw, ~schooling)
+densityplot(imp.train_raw, ~day_of_week)
+train_complete <- complete(imp.train_raw)
+View(train_complete)
+#Confirm no NAs
+sum(sapply(train_complete, function(x) { sum(is.na(x)) }))
+
+
+### Preprocess the missing values for testdataset
+View(SparktestDF)
+
+
+SparktestDF$schooling[grepl("^\\s*$", SparktestDF$schooling)] <- NA
+SparktestDF$day_of_week[grepl("^\\s*$", SparktestDF$day_of_week)] <- NA
+sum(sapply(SparktestDF, function(x) { sum(is.na(x)) }))
+imp.test_raw <- mice(SparktestDF, m=1, method='cart', printFlag=FALSE)
+densityplot(imp.test_raw, ~custAge)
+densityplot(imp.test_raw, ~schooling)
+densityplot(imp.test_raw, ~day_of_week)
+test_complete <- complete(imp.test_raw)
+View(test_complete)
+sum(sapply(test_complete, function(x) { sum(is.na(x)) }))
+str(train_complete)
+
+table(train_complete$responded)
+#   no  yes 
+# 6574  840 
+
+
+cor.test(train_complete$pdays, train_complete$pmonths, method=c("pearson", "kendall", "spearman"))
+
+train_complete$professionR<- train_complete$profession
+train_complete$maritalR<- train_complete$marital
+train_complete$schoolingR <- train_complete$schooling
+train_complete$defaultR <- train_complete$default
+train_complete$housingR <- train_complete$housing
+train_complete$loanR <- train_complete$loan
+train_complete$contactR <- train_complete$contact
+train_complete$monthR <- train_complete$month
+train_complete$day_of_weekR <- train_complete$day_of_week
+train_complete$poutcomeR <- train_complete$poutcome
+
+##### Recode all training categorical variable
+test_complete$professionR<- test_complete$profession
+test_complete$maritalR<- test_complete$marital
+test_complete$schoolingR <- test_complete$schooling
+test_complete$defaultR <- test_complete$default
+test_complete$housingR <- test_complete$housing
+test_complete$loanR <- test_complete$loan
+test_complete$contactR <- test_complete$contact
+test_complete$monthR <- test_complete$month
+test_complete$day_of_weekR <- test_complete$day_of_week
+test_complete$poutcomeR <- test_complete$poutcome
+
+
+### Recoding pdays for training
+library(plyr)
+train_complete$pdaysR<- train_complete$pdays
+train_complete$pdaysR<- ifelse(train_complete$pdaysR %in% c(999),1,0)
+View(train_complete)
+
+### Recoding pdays for testing
+test_complete$pdaysR<- test_complete$pdays
+test_complete$pdaysR<- ifelse(test_complete$pdaysR %in% c(999),1,0)
+View(test_complete)
+View(train_complete)
+
+
+
+### Select all the relevant variables for training
+train_complete1<- subset(train_complete, select=c(1,2,3,4,5,6,7,8,9,10,11,34,13,14,15,16,17,18,19,21,22,23))
+
+### Select the same relevant variables for testing
+test_complete1<- subset(test_complete, select=c(1,2,3,4,5,6,7,8,9,10,11,12,33,14,15,16,17,18,19,20,22))
+
+View(train_complete1)
+
+
+## lets keep a copy of train_complete1 and test_complete1
+train_complete2<- train_complete1
+test_complete2<- test_complete1
+
+### Changing the training categories into numeric for modeling purposes
+ SurT10<- table(train_complete2$housing)
+ addmargins(SurT10)
+ library(plyr)
+ train_complete2$housing<- mapvalues(train_complete2$housing,from = c("no","unknown","yes"), to = c(0,1,2))
+ train_complete2$housing<- as.factor(train_complete2$housing)
+
+ SurT11<- table(train_complete2$loan)
+  addmargins(SurT11)
+ train_complete2$loan<- mapvalues(train_complete2$loan,from = c("no","unknown","yes"), to = c(0,1,2))
+ train_complete2$loan<- as.factor(train_complete2$loan)
+
+
+ SurT12<- table(train_complete2$contact)
+ addmargins(SurT12)
+ train_complete2$contact<- mapvalues(train_complete2$contact,from = c("cellular","telephone"), to = c(0,1))
+ train_complete2$contact<- as.factor(train_complete2$contact)
+
+ SurT13<- table(train_complete2$month)
+ addmargins(SurT13)
+ train_complete2$month<- mapvalues(train_complete2$month,from = c("apr","aug","dec","jul","jun","mar","may","nov","oct","sep"), to = c(0,1,2,3,4,5,6,7,8,9))
+ train_complete2$month<- as.factor(train_complete2$month)
+
+
+ SurT14<- table(train_complete2$day_of_week)
+ addmargins(SurT14)
+ train_complete2$day_of_week<- mapvalues(train_complete2$day_of_week,from = c("fri","mon","thu","tue","wed"), to = c(0,1,2,3,4))
+ train_complete2$day_of_week<- as.factor(train_complete2$day_of_week)
+
+ SurT15<- table(train_complete2$marital)
+ addmargins(SurT15)
+ train_complete2$marital<- mapvalues(train_complete2$marital,from = c("divorced","married","single","unknown"), to = c(0,1,2,3))
+ train_complete2$marital<- as.factor(train_complete2$marital)
+
+
+ SurT16<- table(train_complete2$poutcome)
+ addmargins(SurT16)
+ train_complete2$poutcome<- mapvalues(train_complete2$poutcome,from = c("failure","nonexistent","success"), to = c(0,1,2))
+ train_complete2$poutcome<- as.factor(train_complete2$poutcome)
+
+### Creating training and validating set from the training data
+
+library(caret)
+a <- createDataPartition(train_complete2$responded, p = 0.8, list=FALSE)
+training <- train_complete2[a,]
+validating <- train_complete2[-a,]
+
+
+View(train_complete2)
+
+### Need to add the column responded to ensure # of features are same in training, validation and test sets
+
+test_complete2["responded"] <- NA
+View(test_complete2)
+View(test_complete2)
+
+SurT10<- table(test_complete2$housing)
+ addmargins(SurT10)
+ library(plyr)
+ test_complete2$housing<- mapvalues(test_complete2$housing,from = c("no","unknown","yes"), to = c(0,1,2))
+ test_complete2$housing<- as.factor(test_complete2$housing)
+
+ SurT11<- table(test_complete2$loan)
+  addmargins(SurT11)
+ test_complete2$loan<- mapvalues(test_complete2$loan,from = c("no","unknown","yes"), to = c(0,1,2))
+ test_complete2$loan<- as.factor(test_complete2$loan)
+
+
+ SurT12<- table(test_complete2$contact)
+ addmargins(SurT12)
+ test_complete2$contact<- mapvalues(test_complete2$contact,from = c("cellular","telephone"), to = c(0,1))
+ test_complete2$contact<- as.factor(test_complete2$contact)
+
+ SurT13<- table(test_complete2$month)
+ addmargins(SurT13)
+ test_complete2$month<- mapvalues(test_complete2$month,from = c("apr","aug","dec","jul","jun","mar","may","nov","oct","sep"), to = c(0,1,2,3,4,5,6,7,8,9))
+ test_complete2$month<- as.factor(test_complete2$month)
+
+
+ SurT14<- table(test_complete2$day_of_week)
+ addmargins(SurT14)
+ test_complete2$day_of_week<- mapvalues(test_complete2$day_of_week,from = c("fri","mon","thu","tue","wed"), to = c(0,1,2,3,4))
+ test_complete2$day_of_week<- as.factor(test_complete2$day_of_week)
+
+ SurT15<- table(test_complete2$marital)
+ addmargins(SurT15)
+ test_complete2$marital<- mapvalues(test_complete2$marital,from = c("divorced","married","single","unknown"), to = c(0,1,2,3))
+ test_complete2$marital<- as.factor(test_complete2$marital)
+
+
+ SurT16<- table(test_complete2$poutcome)
+ addmargins(SurT16)
+ test_complete2$poutcome<- mapvalues(test_complete2$poutcome,from = c("failure","nonexistent","success"), to = c(0,1,2))
+ test_complete2$poutcome<- as.factor(test_complete2$poutcome)
+
+
+ 
+
+
+### Fireup H2o
+
+library(h2o)
+h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+
+train_h2o <- as.h2o(training)
+valid_h2o <- as.h2o(validating)
+test_h2o <- as.h2o(test_complete2)
+
+y <- "responded"
+x <- setdiff(names(train_h2o), c(y, "id"))
+
+set.seed(1000)
+automl_models_h2o <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 45
+)
+
+### Find out the leader model
+automl_models_h2o@leader
+
+### Predict
+pred_h2o <- h2o.predict( automl_models_h2o@leader, newdata = valid_h2o)
+
+View(validating)
+pred<- as.data.frame(pred_h2o)
+
+
+
+validating<- cbind(validating,pred)
+
+View(validating)
+
+Acc_AutoML<- 1- (mean(validating$responded!= validating$predict))
+
+Acc_AutoML
+ # 0.9156545
+
+### Confusion Metrix
+ table(validating$responded, validating$predict)
+
+### Predict the test data
+
+pred_h2o_test <- h2o.predict( automl_models_h2o@leader, newdata = test_h2o)
+
+pred_test<- as.data.frame(pred_h2o_test)
+
+
+View(pred_test)
+test_complete2<- cbind(test_complete2,pred_test)
+View(test_complete2)
+
+write.csv(test_complete2[,1:25], "test_complete2.csv", row.names = FALSE)
+
+savehistory("~/CodeForAllProjects/R/SparkCognitionDataScienceAssignment/RCode5.Rhistory")
+
+
+##### try with a balance sample
+
+install.packages("ROSE")
+library(ROSE)
+data_bal <- ovun.sample(responded ~ ., data = train_complete, method = "both", p=0.5, N=7414, seed = 1)$data
+
+table(data_bal$responded)
+
+
+ data_bal$professionR<- data_bal$profession
+ data_bal$maritalR<- data_bal$marital
+ data_bal$schoolingR <- data_bal$schooling
+ data_bal$defaultR <- data_bal$default
+ data_bal$housingR <- data_bal$housing
+ data_bal$loanR <- data_bal$loan
+ data_bal$contactR <- data_bal$contact
+ data_bal$monthR <- data_bal$month
+ data_bal$day_of_weekR <- data_bal$day_of_week
+ data_bal$poutcomeR <- data_bal$poutcome
+
+
+data_bal$pdaysR<- data_bal$pdays
+data_bal$pdaysR<- ifelse(data_bal$pdaysR %in% c(999),1,0)
+View(train_complete)
+
+
+data_bal1<- subset(data_bal, select=c(1,2,3,4,5,6,7,8,9,10,11,34,13,14,15,16,17,18,19,21,22,23))
+
+
+##### Change the string variable to categorical variables
+library(plyr)
+
+SurT10<- table(data_bal1$housing)
+ addmargins(SurT10)
+ library(plyr)
+ data_bal1$housing<- mapvalues(data_bal1$housing,from = c("no","unknown","yes"), to = c(0,1,2))
+ data_bal1$housing<- as.factor(data_bal1$housing)
+
+ SurT11<- table(data_bal1$loan)
+  addmargins(SurT11)
+ data_bal1$loan<- mapvalues(data_bal1$loan,from = c("no","unknown","yes"), to = c(0,1,2))
+ data_bal1$loan<- as.factor(data_bal1$loan)
+
+
+ SurT12<- table(data_bal1$contact)
+ addmargins(SurT12)
+ data_bal1$contact<- mapvalues(data_bal1$contact,from = c("cellular","telephone"), to = c(0,1))
+ data_bal1$contact<- as.factor(data_bal1$contact)
+
+ SurT13<- table(data_bal1$month)
+ addmargins(SurT13)
+ data_bal1$month<- mapvalues(data_bal1$month,from = c("apr","aug","dec","jul","jun","mar","may","nov","oct","sep"), to = c(0,1,2,3,4,5,6,7,8,9))
+ data_bal1$month<- as.factor(data_bal1$month)
+
+
+ SurT14<- table(data_bal1$day_of_week)
+ addmargins(SurT14)
+ data_bal1$day_of_week<- mapvalues(data_bal1$day_of_week,from =  c("fri","mon","thu","tue","wed"), to = c(0,1,2,3,4))
+ data_bal1$day_of_week<- as.factor(data_bal1$day_of_week)
+
+ SurT15<- table(data_bal1$marital)
+ addmargins(SurT15)
+ data_bal1$marital<- mapvalues(data_bal1$marital,from = c("divorced","married","single","unknown"), to = c(0,1,2,3))
+ data_bal1$marital<- as.factor(data_bal1$marital)
+
+
+ SurT16<- table(data_bal1$poutcome)
+ addmargins(SurT16)
+ data_bal1$poutcome<- mapvalues(data_bal1$poutcome,from = c("failure","nonexistent","success"), to = c(0,1,2))
+ data_bal1$poutcome<- as.factor(data_bal1$poutcome)
+
+
+## lets keep a copy of data_bal1 and test_complete1
+data_bal2<- data_bal1
+
+
+a1 <- createDataPartition(data_bal2$responded, p = 0.8, list=FALSE)
+training_bal <- data_bal2[a1,]
+validating_bal <- data_bal2[-a1,]
+
+train_bal_h2o <- as.h2o(training_bal)
+valid_bal_h2o <- as.h2o(validating_bal)
+test_bal_h2o <- as.h2o(test_complete2)
+
+y <- "responded"
+x <- setdiff(names(train_bal_h2o), c(y, "id"))
+
+set.seed(1999)
+automl_models_bal_h2o <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_bal_h2o,
+validation_frame  = valid_bal_h2o,
+max_runtime_secs  = 45
+)
+
+
+### Find out the leader model
+automl_models_bal_h2o@leader
+
+
+### Predict
+pred_bal_h2o <- h2o.predict( automl_models_bal_h2o@leader
+, newdata = valid_bal_h2o)
+
+
+pred_bal<- as.data.frame(pred_bal_h2o)
+
+validating_bal<- cbind(validating_bal,pred_bal)
+
+Acc_AutoML_bal<- 1- (mean(validating_bal$responded!= validating_bal$predict))
+
+      Acc_AutoML_bal
+## [1] 0.9527665
+
+### Confusion Metrix
+table(validating_bal$responded, validating_bal$predict)
+
+      
+ #      no yes
+ # no  698  47
+ # yes  23 714
+### Predict the test data
+
+pred_h2o_bal_test <- h2o.predict( automl_models_bal_h2o@leader, newdata = test_bal_h2o)
+
+pred_bal_test<- as.data.frame(pred_h2o_bal_test)
+
+
+View(pred_test)
+test_bal_complete2<- cbind(test_complete2,pred_bal_test)
+View(test_bal_complete2)
+
+write.csv(test_bal_complete2[,1:25], "test_bal_complete2.csv", row.names = FALSE)
+
+h2o.shutdown(prompt=FALSE)
+## [1] TRUE
+

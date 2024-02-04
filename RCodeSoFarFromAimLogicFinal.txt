@@ -1,0 +1,1000 @@
+599   192.103.152.177                  DCASEY1351@CHARTER.NET Domestic
+600     67.77.209.252                    SABAKER828@GMAIL.COM   Import
+601     24.168.218.15                    TAMIANDSHAWN@AIM.COM   Import
+602     64.12.116.144                   CHEESEITSR4ME@AOL.COM   Import
+603     24.216.100.67                 YOUNGPOEYOUNG@GMAIL.COM   Import
+604    216.21.213.152                      DARLAACADY@MSN.COM   Import
+605     99.26.241.152                  SRANKIN2@BELLSOUTH.NET Domestic
+606     75.139.66.113                COPPERPENNYS@CHARTER.NET   Import
+607   216.250.215.109                   TRACIHUNTER@GMAIL.COM Domestic
+608    155.206.136.80                   SANDYHALSEY@YAHOO.COM   Import
+609      70.89.81.214                    CHRISPINGLEY@AOL.COM Domestic
+610     97.95.197.148            ANAMILENACARDONA@HOTMAIL.COM   Import
+611     75.137.118.61                 PIMPMASTER4@HOTMAIL.COM   Import
+612      97.89.141.49                    KMHCOLLINS@YAHOO.COM   Import
+613      66.56.22.125                  RTWILLIAMS@CHARTER.NET Domestic
+614      12.69.155.85                       BRADBJJ76@AOL.COM Domestic
+615     144.5.170.253                   ELEANORMORROW@AOL.COM Domestic
+616     75.71.184.154                 HAROLDZOELLER@YAHOO.COM Domestic
+617     69.234.102.21                CORY_MANNING@HOTMAIL.COM   Import
+618      98.84.92.199              JEFFREYBLEVINS54@YAHOO.COM Domestic
+619    75.143.166.187                   KARLAKAYLYN@YAHOO.COM Domestic
+620    75.139.126.133                  ALVASHI801@HOTMAIL.COM   Import
+621   174.195.150.220               REBECCA.HEMMING@GMAIL.COM Domestic
+622    108.213.193.60                      JJDBUCKY@GMAIL.COM Domestic
+623    209.214.223.77                      BCROWNW2@GMAIL.COM Domestic
+624    68.143.244.114                 WALLYFARM2011@GMAIL.COM Domestic
+625       96.66.62.30                     REALTA611@GMAIL.COM Domestic
+ [ reached getOption("max.print") -- omitted 14775 rows ]
+> file_names = list.files(getwd())
+> file_names = list.files(getwd())
+> TD1 <- read.csv("Data1.csv", sep=",")
+> TD1 <- read.csv("Data1.csv", sep=",")
+> TD2 <- read.csv("Data2.csv", sep=",")
+> TD2 <- read.csv("Data2.csv", sep=",")
+> complete.dat <- rbind(TD1,TD2) 
+> complete.dat <- rbind(TD1,TD2) 
+> View(complete.dat)
+> View(complete.dat)
+> setwd("C:/NCC/DataUsed_Phase1Analysis")
+> setwd("C:/NCC/DataUsed_Phase1Analysis")
+> umxRenameFile <- function(baseFolder = "C:/NCC/DataUsed_Phase1Analysis", findStr = NA, replaceStr = NA, listPattern = NA, test = T, overwrite = F) {
+> umxRenameFile <- function(baseFolder = "C:/NCC/DataUsed_Phase1Analysis", findStr = NA, replaceStr = NA, listPattern = NA, test = T, overwrite = F) {
++     # uppercase = u$1
++     # uppercase = u$1
++     if(baseFolder == "Finder"){
++     if(baseFolder == "Finder"){
++         baseFolder = system(intern = T, "osascript -e 'tell application \"Finder\" to get the POSIX path of (target of front window as alias)'")
++         baseFolder = system(intern = T, "osascript -e 'tell application \"Finder\" to get the POSIX path of (target of front window as alias)'")
++         message("Using front-most Finder window:", baseFolder)
++     } else if(baseFolder == "") {
++         baseFolder = paste(dirname(file.choose(new = FALSE)), "/", sep = "") ## choose a directory
++         message("Using front-most Finder window:", baseFolder)
++     } else if(baseFolder == "") {
++         baseFolder = paste(dirname(file.choose(new = FALSE)), "/", sep = "") ## choose a directory
++         message("Using selected folder:", baseFolder)
++     }
++     if(is.na(listPattern)){
++         listPattern = findStr
++     }
++     a = list.files(baseFolder, pattern = listPattern)
++         message("Using selected folder:", baseFolder)
++     }
++     if(is.na(listPattern)){
++         listPattern = findStr
++     }
++     a = list.files(baseFolder, pattern = listPattern)
++     message("found ", length(a), " possible files")
++     changed = 0
++     for (fn in a) {
++         findB = grepl(pattern = findStr, fn) # returns 1 if found
++         if(findB){
++             fnew = gsub(findStr, replace = replaceStr, fn) # replace all instances
++             if(test){
++                 message("would change ", fn, " to ", fnew)  
++             } else {
++                 if((!overwrite) & file.exists(paste(baseFolder, fnew, sep = ""))){
++                     message("renaming ", fn, "to", fnew, "failed as already exists. To overwrite set T")
++                 } else {
++                     file.rename(paste(baseFolder, fn, sep = ""), paste(baseFolder, fnew, sep = ""))
++                     changed = changed + 1;
++     message("found ", length(a), " possible files")
++     changed = 0
++     for (fn in a) {
++         findB = grepl(pattern = findStr, fn) # returns 1 if found
++         if(findB){
++             fnew = gsub(findStr, replace = replaceStr, fn) # replace all instances
++             if(test){
++                 message("would change ", fn, " to ", fnew)  
++             } else {
++                 if((!overwrite) & file.exists(paste(baseFolder, fnew, sep = ""))){
++                     message("renaming ", fn, "to", fnew, "failed as already exists. To overwrite set T")
++                 } else {
++                     file.rename(paste(baseFolder, fn, sep = ""), paste(baseFolder, fnew, sep = ""))
++                     changed = changed + 1;
++                 }
++             }
++         }else{
++             if(test){
++                 # message(paste("bad file",fn))
++             }
++         }
++     }
++     message("changed ", changed)
++ }
++                 }
++             }
++         }else{
++             if(test){
++                 # message(paste("bad file",fn))
++             }
++         }
++     }
++     message("changed ", changed)
++ }
+> setwd("C:/NCC/CSVClean")
+> setwd("C:/NCC/CSVClean")
+> TD1 <- read.csv("Data1.csv", sep=",")
+> TD1 <- read.csv("Data1.csv", sep=",")
+> D1 <- read.csv("Data1.csv", sep=",")
+> D1 <- read.csv("Data1.csv", sep=",")
+> D2  <- read.csv("Data2.csv", sep=",")
+> D2  <- read.csv("Data2.csv", sep=",")
+> D3  <- read.csv("Data3.csv", sep=",")
+> D3  <- read.csv("Data3.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3) 
+> complete.dat <- rbind(D1,D2,D3) 
+> D4  <- read.csv("Data4.csv", sep=",")
+> D4  <- read.csv("Data4.csv", sep=",")
+> D5  <- read.csv("Data5.csv", sep=",")
+> D5  <- read.csv("Data5.csv", sep=",")
+> D6  <- read.csv("Data6.csv", sep=",")
+> D6  <- read.csv("Data6.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6) 
+> D7  <- read.csv("Data7.csv", sep=",")
+> D7  <- read.csv("Data7.csv", sep=",")
+> D8  <- read.csv("Data8.csv", sep=",")
+> D8  <- read.csv("Data8.csv", sep=",")
+> D9  <- read.csv("Data9.csv", sep=",")
+> D9  <- read.csv("Data9.csv", sep=",")
+> D10  <- read.csv("Data10.csv", sep=",")
+> D10  <- read.csv("Data10.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10) 
+> D11  <- read.csv("Data11.csv", sep=",")
+> D11  <- read.csv("Data11.csv", sep=",")
+> D12  <- read.csv("Data12.csv", sep=",")
+> D12  <- read.csv("Data12.csv", sep=",")
+> D13  <- read.csv("Data13.csv", sep=",")
+> D13  <- read.csv("Data13.csv", sep=",")
+> D14  <- read.csv("Data14.csv", sep=",")
+> D14  <- read.csv("Data14.csv", sep=",")
+> D15  <- read.csv("Data15.csv", sep=",")
+> D15  <- read.csv("Data15.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D13  <- read.csv("Data13.csv", sep=",")
+> D13  <- read.csv("Data13.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14) 
+> D15  <- read.csv("Data15.csv", sep=",")
+> D15  <- read.csv("Data15.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15) 
+> D16  <- read.csv("Data16.csv", sep=",")
+> D16  <- read.csv("Data16.csv", sep=",")
+> D17  <- read.csv("Data17.csv", sep=",")
+> D17  <- read.csv("Data17.csv", sep=",")
+> D18  <- read.csv("Data18.csv", sep=",")
+> D18  <- read.csv("Data18.csv", sep=",")
+> D19  <- read.csv("Data19.csv", sep=",")
+> D19  <- read.csv("Data19.csv", sep=",")
+> D20  <- read.csv("Data20.csv", sep=",")
+> D20  <- read.csv("Data20.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20) 
+> D21  <- read.csv("Data21.csv", sep=",")
+> D21  <- read.csv("Data21.csv", sep=",")
+> D22  <- read.csv("Data22.csv", sep=",")
+> D22  <- read.csv("Data22.csv", sep=",")
+> D23  <- read.csv("Data23.csv", sep=",")
+> D23  <- read.csv("Data23.csv", sep=",")
+> D24  <- read.csv("Data24.csv", sep=",")
+> D24  <- read.csv("Data24.csv", sep=",")
+> D25  <- read.csv("Data25.csv", sep=",")
+> D25  <- read.csv("Data25.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25) 
+> D26  <- read.csv("Data26.csv", sep=",")
+> D26  <- read.csv("Data26.csv", sep=",")
+> D27  <- read.csv("Data27.csv", sep=",")
+> D27  <- read.csv("Data27.csv", sep=",")
+> D28  <- read.csv("Data28.csv", sep=",")
+> D28  <- read.csv("Data28.csv", sep=",")
+> D29  <- read.csv("Data29.csv", sep=",")
+> D29  <- read.csv("Data29.csv", sep=",")
+> D30  <- read.csv("Data30.csv", sep=",")
+> D30  <- read.csv("Data30.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25.D26,D27,D28,D29,D30) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25.D26,D27,D28,D29,D30) 
+Error in rbind(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D13,  : 
+  object 'D25.D26' not found
+Error in rbind(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D13,  : 
+  object 'D25.D26' not found
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D29  <- read.csv("Data29.csv", sep=",")
+> D29  <- read.csv("Data29.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30) 
+> D31  <- read.csv("Data31.csv", sep=",")
+> D31  <- read.csv("Data31.csv", sep=",")
+> D32  <- read.csv("Data32.csv", sep=",")
+> D32  <- read.csv("Data32.csv", sep=",")
+> D33  <- read.csv("Data33.csv", sep=",")
+> D33  <- read.csv("Data33.csv", sep=",")
+> D34  <- read.csv("Data34.csv", sep=",")
+> D34  <- read.csv("Data34.csv", sep=",")
+> D35  <- read.csv("Data35.csv", sep=",")
+> D35  <- read.csv("Data35.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35) 
+> D36  <- read.csv("Data36.csv", sep=",")
+> D36  <- read.csv("Data36.csv", sep=",")
+> D37  <- read.csv("Data37.csv", sep=",")
+> D37  <- read.csv("Data37.csv", sep=",")
+> D38  <- read.csv("Data38.csv", sep=",")
+> D38  <- read.csv("Data38.csv", sep=",")
+> D39  <- read.csv("Data39.csv", sep=",")
+> D39  <- read.csv("Data39.csv", sep=",")
+> D40  <- read.csv("Data40.csv", sep=",")
+> D40  <- read.csv("Data40.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40) 
+> D41  <- read.csv("Data41.csv", sep=",")
+> D41  <- read.csv("Data41.csv", sep=",")
+> D42  <- read.csv("Data42.csv", sep=",")
+> D42  <- read.csv("Data42.csv", sep=",")
+> D43  <- read.csv("Data43.csv", sep=",")
+> D43  <- read.csv("Data43.csv", sep=",")
+> D44  <- read.csv("Data44.csv", sep=",")
+> D44  <- read.csv("Data44.csv", sep=",")
+> D45  <- read.csv("Data45.csv", sep=",")
+> D45  <- read.csv("Data45.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40.D41,D42,D43,D44,D45) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40.D41,D42,D43,D44,D45) 
+Error in rbind(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D13,  : 
+  object 'D40.D41' not found
+Error in rbind(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D13,  : 
+  object 'D40.D41' not found
+> D45  <- read.csv("Data45.csv", sep=",")
+> D45  <- read.csv("Data45.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40.D41,D42,D43,D44,D45) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40.D41,D42,D43,D44,D45) 
+Error in rbind(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D13,  : 
+  object 'D40.D41' not found
+Error in rbind(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D13,  : 
+  object 'D40.D41' not found
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45) 
+> D46  <- read.csv("Data46.csv", sep=",")
+> D46  <- read.csv("Data46.csv", sep=",")
+> D47  <- read.csv("Data47.csv", sep=",")
+> D47  <- read.csv("Data47.csv", sep=",")
+> D48  <- read.csv("Data48.csv", sep=",")
+> D48  <- read.csv("Data48.csv", sep=",")
+> D49  <- read.csv("Data49.csv", sep=",")
+> D49  <- read.csv("Data49.csv", sep=",")
+> D50  <- read.csv("Data50.csv", sep=",")
+> D50  <- read.csv("Data50.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50) 
+> D51  <- read.csv("Data51.csv", sep=",")
+> D51  <- read.csv("Data51.csv", sep=",")
+> D52  <- read.csv("Data52.csv", sep=",")
+> D52  <- read.csv("Data52.csv", sep=",")
+> D53  <- read.csv("Data53.csv", sep=",")
+> D53  <- read.csv("Data53.csv", sep=",")
+> D54  <- read.csv("Data54.csv", sep=",")
+> D54  <- read.csv("Data54.csv", sep=",")
+> D55  <- read.csv("Data55.csv", sep=",")
+> D55  <- read.csv("Data55.csv", sep=",")
+> D52  <- read.csv("Data52.csv", sep=",")
+> D52  <- read.csv("Data52.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51,D52,D53,D54,D55) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51,D52,D53,D54,D55) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> D51  <- read.csv("Data51.csv", sep=",")
+> D51  <- read.csv("Data51.csv", sep=",")
+> D52  <- read.csv("Data52.csv", sep=",")
+> D52  <- read.csv("Data52.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51,D52) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51,D52) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> str(D51)
+> str(D51)
+'data.frame':	12 obs. of  12 variables:
+ $ FirstName  : Factor w/ 12 levels "CHRISTINA","CLETA",..: 5 1 12 10 4 2 11 3 6 8 ...
+ $ MiddleInit : Factor w/ 12 levels "BROWN","HANCOCK",..: 12 11 2 5 8 7 9 6 1 10 ...
+ $ LastName   : Factor w/ 12 levels "1009 SPRINGWOOD LN",..: 2 5 6 9 10 11 8 4 1 3 ...
+ $ Address1   : Factor w/ 5 levels "CELINA","LAKEVIEW",..: 2 4 5 3 3 3 2 1 5 1 ...
+ $ City       : Factor w/ 1 level "OH": 1 1 1 1 1 1 1 1 1 1 ...
+ $ State      : int  43331 45891 45895 45804 45805 45801 43331 45822 45895 45822 ...
+ $ Zip5       : int  9151 2026 7937 3671 1079 1448 9601 4110 9244 1178 ...
+ $ Zip4       : logi  NA NA NA NA NA NA ...
+ $ Make1      : Factor w/ 6 levels "CHEVROLET","CHRYSLER",..: 1 1 2 6 3 1 4 1 5 1 ...
+ $ Model1     : Factor w/ 12 levels "AVALANCHE","CHARGER",..: 6 12 9 8 2 1 5 7 3 4 ...
+ $ Year1      : int  2008 2008 2007 2012 2010 2002 2007 2003 2013 2005 ...
+ $ Dealer.Name: Factor w/ 1 level "Kia of Lima": 1 1 1 1 1 1 1 1 1 1 ...
+'data.frame':	12 obs. of  12 variables:
+ $ FirstName  : Factor w/ 12 levels "CHRISTINA","CLETA",..: 5 1 12 10 4 2 11 3 6 8 ...
+ $ MiddleInit : Factor w/ 12 levels "BROWN","HANCOCK",..: 12 11 2 5 8 7 9 6 1 10 ...
+ $ LastName   : Factor w/ 12 levels "1009 SPRINGWOOD LN",..: 2 5 6 9 10 11 8 4 1 3 ...
+ $ Address1   : Factor w/ 5 levels "CELINA","LAKEVIEW",..: 2 4 5 3 3 3 2 1 5 1 ...
+ $ City       : Factor w/ 1 level "OH": 1 1 1 1 1 1 1 1 1 1 ...
+ $ State      : int  43331 45891 45895 45804 45805 45801 43331 45822 45895 45822 ...
+ $ Zip5       : int  9151 2026 7937 3671 1079 1448 9601 4110 9244 1178 ...
+ $ Zip4       : logi  NA NA NA NA NA NA ...
+ $ Make1      : Factor w/ 6 levels "CHEVROLET","CHRYSLER",..: 1 1 2 6 3 1 4 1 5 1 ...
+ $ Model1     : Factor w/ 12 levels "AVALANCHE","CHARGER",..: 6 12 9 8 2 1 5 7 3 4 ...
+ $ Year1      : int  2008 2008 2007 2012 2010 2002 2007 2003 2013 2005 ...
+ $ Dealer.Name: Factor w/ 1 level "Kia of Lima": 1 1 1 1 1 1 1 1 1 1 ...
+> Str(D50)
+> Str(D50)
+Error: could not find function "Str"
+Error: could not find function "Str"
+> str(D50)
+> str(D50)
+'data.frame':	83 obs. of  12 variables:
+ $ FirstName  :'data.frame':	83 obs. of  12 variables:
+ $ FirstName  : Factor w/ 67 levels "BOB","BONNIE",..: 40 61 26 32 1 62 18 41 23 9 ...
+ $ MiddleInit : Factor w/ 6 levels "","E","J","M",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ LastName   : Factor w/ 76 levels "ABBOTT","BARKDOLL",..: 52 67 53 18 35 72 43 44 10 2 ...
+ $ Address1   : Factor w/ 80 levels "10 CRIMSON WAY",..: 4 5 6 7 8 9 10 11 12 15 ...
+ $ City       : Factor w/ 16 levels "BIGLERVILLE",..: 2 16 5 9 10 6 15 6 15 15 ...
+ $ State      : Factor w/ 2 levels "MD","PA": 2 1 2 2 1 1 2 1 2 2 ...
+ $ Zip5       : int  17201 21795 17225 17236 21769 21742 17268 21742 17268 17268 ...
+ $ Zip4       : Factor w/ 71 levels "1040","1099",..: 11 6 62 58 24 16 20 17 53 43 ...
+ $ Make1      : Factor w/ 15 levels "BUICK","CHEVROLET",..: 2 5 4 2 8 11 2 11 12 5 ...
+ $ Model1     : Factor w/ 46 levels "300","ACADIA",..: 3 19 7 5 14 10 9 27 23 13 ...
+ $ Year1      : int  2011 2010 2007 2013 2012 2012 2011 2005 2011 2013 ...
+ $ Dealer.Name: Factor w/ 1 level "Keystone Ford ": 1 1 1 1 1 1 1 1 1 1 ...
+ Factor w/ 67 levels "BOB","BONNIE",..: 40 61 26 32 1 62 18 41 23 9 ...
+ $ MiddleInit : Factor w/ 6 levels "","E","J","M",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ LastName   : Factor w/ 76 levels "ABBOTT","BARKDOLL",..: 52 67 53 18 35 72 43 44 10 2 ...
+ $ Address1   : Factor w/ 80 levels "10 CRIMSON WAY",..: 4 5 6 7 8 9 10 11 12 15 ...
+ $ City       : Factor w/ 16 levels "BIGLERVILLE",..: 2 16 5 9 10 6 15 6 15 15 ...
+ $ State      : Factor w/ 2 levels "MD","PA": 2 1 2 2 1 1 2 1 2 2 ...
+ $ Zip5       : int  17201 21795 17225 17236 21769 21742 17268 21742 17268 17268 ...
+ $ Zip4       : Factor w/ 71 levels "1040","1099",..: 11 6 62 58 24 16 20 17 53 43 ...
+ $ Make1      : Factor w/ 15 levels "BUICK","CHEVROLET",..: 2 5 4 2 8 11 2 11 12 5 ...
+ $ Model1     : Factor w/ 46 levels "300","ACADIA",..: 3 19 7 5 14 10 9 27 23 13 ...
+ $ Year1      : int  2011 2010 2007 2013 2012 2012 2011 2005 2011 2013 ...
+ $ Dealer.Name: Factor w/ 1 level "Keystone Ford ": 1 1 1 1 1 1 1 1 1 1 ...
+> str(D51)
+> str(D51)
+'data.frame':	12 obs. of  12 variables:
+ $ FirstName  : Factor w/ 12 levels "CHRISTINA","CLETA",..: 5 1 12 10 4 2 11 3 6 8 ...
+ $ MiddleInit : Factor w/ 12 levels "BROWN","HANCOCK",..: 12 11 2 5 8 7 9 6 1 10 ...
+ $ LastName   : Factor w/ 12 levels "1009 SPRINGWOOD LN",..: 2 5 6 9 10 11 8 4 1 3 ...
+ $ Address1   : Factor w/ 5 levels "CELINA","LAKEVIEW",..: 2 4 5 3 3 3 2 1 5 1 ...
+ $ City       : Factor w/ 1 level "OH": 1 1 1 1 1 1 1 1 1 1 ...
+ $ State      : int  43331 45891 45895 45804 45805 45801 43331 45822 45895 45822 ...
+ $ Zip5       : int  9151 2026 7937 3671 1079 1448 9601 4110 9244 1178 ...
+ $ Zip4       : logi  NA NA NA NA NA NA ...
+ $ Make1      : Factor w/ 6 levels "CHEVROLET","CHRYSLER",..: 1 1 2 6 3 1 4 1 5 1 ...
+ $ Model1     : Factor w/ 12 levels "AVALANCHE","CHARGER",..: 6 12 9 8 2 1 5 7 3 4 ...
+ $ Year1      : int  2008 2008 2007 2012 2010 2002 2007 2003 2013 2005 ...
+ $ Dealer.Name: Factor w/ 1 level "Kia of Lima": 1 1 1 1 1 1 1 1 1 1 ...
+'data.frame':	12 obs. of  12 variables:
+ $ FirstName  : Factor w/ 12 levels "CHRISTINA","CLETA",..: 5 1 12 10 4 2 11 3 6 8 ...
+ $ MiddleInit : Factor w/ 12 levels "BROWN","HANCOCK",..: 12 11 2 5 8 7 9 6 1 10 ...
+ $ LastName   : Factor w/ 12 levels "1009 SPRINGWOOD LN",..: 2 5 6 9 10 11 8 4 1 3 ...
+ $ Address1   : Factor w/ 5 levels "CELINA","LAKEVIEW",..: 2 4 5 3 3 3 2 1 5 1 ...
+ $ City       : Factor w/ 1 level "OH": 1 1 1 1 1 1 1 1 1 1 ...
+ $ State      : int  43331 45891 45895 45804 45805 45801 43331 45822 45895 45822 ...
+ $ Zip5       : int  9151 2026 7937 3671 1079 1448 9601 4110 9244 1178 ...
+ $ Zip4       : logi  NA NA NA NA NA NA ...
+ $ Make1      : Factor w/ 6 levels "CHEVROLET","CHRYSLER",..: 1 1 2 6 3 1 4 1 5 1 ...
+ $ Model1     : Factor w/ 12 levels "AVALANCHE","CHARGER",..: 6 12 9 8 2 1 5 7 3 4 ...
+ $ Year1      : int  2008 2008 2007 2012 2010 2002 2007 2003 2013 2005 ...
+ $ Dealer.Name: Factor w/ 1 level "Kia of Lima": 1 1 1 1 1 1 1 1 1 1 ...
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50) 
+> D51  <- read.csv("Data51.csv", sep=",")
+> D51  <- read.csv("Data51.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> str(D51)
+> str(D51)
+'data.frame':	12 obs. of  12 variables:
+ $ FirstName  : Factor w/ 12 levels "CHRISTINA","CLETA",..: 5 1 12 10 4 2 11 3 6 8 ...
+ $ MiddleInit : Factor w/ 12 levels "BROWN","HANCOCK",..: 12 11 2 5 8 7 9 6 1 10 ...
+ $ LastName   : Factor w/ 12 levels "1009 SPRINGWOOD LN",..: 2 5 6 9 10 11 8 4 1 3 ...
+ $ Address1   : Factor w/ 5 levels "CELINA","LAKEVIEW",..: 2 4 5 3 3 3 2 1 5 1 ...
+ $ City       'data.frame':	12 obs. of  12 variables:
+ $ FirstName  : Factor w/ 12 levels "CHRISTINA","CLETA",..: 5 1 12 10 4 2 11 3 6 8 ...
+ $ MiddleInit : Factor w/ 12 levels "BROWN","HANCOCK",..: 12 11 2 5 8 7 9 6 1 10 ...
+ $ LastName   : Factor w/ 12 levels "1009 SPRINGWOOD LN",..: 2 5 6 9 10 11 8 4 1 3 ...
+ $ Address1   : Factor w/ 5 levels "CELINA","LAKEVIEW",..: 2 4 5 3 3 3 2 1 5 1 ...
+ $ City       : Factor w/ 1 level "OH": 1 1 1 1 1 1 1 1 1 1 ...
+ $ State      : int  43331 45891 45895 45804 45805 45801 43331 45822 45895 45822 ...
+ $ Zip5       : int  9151 2026 7937 3671 1079 1448 9601 4110 9244 1178 ...
+ $ Zip4       : logi  NA NA NA NA NA NA ...
+ $ Make1      : Factor w/ 6 levels "CHEVROLET","CHRYSLER",..: 1 1 2 6 3 1 4 1 5 1 ...
+ $ Model1     : Factor w/ 12 levels "AVALANCHE","CHARGER",..: 6 12 9 8 2 1 5 7 3 4 ...
+ $ Year1      : int  2008 2008 2007 2012 2010 2002 2007 2003 2013 2005 ...
+ $ Dealer.Name: Factor w/ 1 level "Kia of Lima": 1 1 1 1 1 1 1 1 1 1 ...
+: Factor w/ 1 level "OH": 1 1 1 1 1 1 1 1 1 1 ...
+ $ State      : int  43331 45891 45895 45804 45805 45801 43331 45822 45895 45822 ...
+ $ Zip5       : int  9151 2026 7937 3671 1079 1448 9601 4110 9244 1178 ...
+ $ Zip4       : logi  NA NA NA NA NA NA ...
+ $ Make1      : Factor w/ 6 levels "CHEVROLET","CHRYSLER",..: 1 1 2 6 3 1 4 1 5 1 ...
+ $ Model1     : Factor w/ 12 levels "AVALANCHE","CHARGER",..: 6 12 9 8 2 1 5 7 3 4 ...
+ $ Year1      : int  2008 2008 2007 2012 2010 2002 2007 2003 2013 2005 ...
+ $ Dealer.Name: Factor w/ 1 level "Kia of Lima": 1 1 1 1 1 1 1 1 1 1 ...
+> D51[,c(1,2,3,4,5,10,11)] <- sapply(D51[,c(1,2,3,4,5,10,11)],as.character) 
+> D51[,c(1,2,3,4,5,10,11)] <- sapply(D51[,c(1,2,3,4,5,10,11)],as.character) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> View(complete.dat)
+> View(complete.dat)
+> summary(complete.dat)
+> summary(complete.dat)
+   FirstName      MiddleInit       LastName                Address1               City          State    
+ MICHAEL:  42          :1086   SMITH   :  17                   :   6   CORAL SPRINGS: 123   OH     :462  
+ JOHN   :  34   A      :  28   JOHNSON :  11   WAPAKONETA      :   3   TROY         :  73   FL     :270  
+ ROBERT :  34   J      :  23   WILLIAMS:   9   LIMA            :   3   SAINT LOUIS  :  66   SC     :120  
+ JAMES  :  31   M      :  20           :   9   CELINA          :   3   TIPP CITY    :  51   GA     :117  
+ WILLIAM:  29   L      :  14   TAYLOR  :   9   5144 SLOPE DR   :   2   OGDEN        :  49   PA     :110  
+ DAVID  :  27   (Other): 121   BROWN   :   7   11190 NW 39TH ST:   2   MARGATE      :  42   (Other):771  
+ (Other):1665   NA's   : 570   (Other) :1800   (Other)         :1843   (Other)      :1458   NA's   : 12  
+      Zip5           Zip4                 Make1         Model1        Year1          
+ Min.   : 1079   Length:1862        CHEVROLET:296   FUSION :  51   Length:1862       
+ 1st Qu.:30075   Class :character   FORD     :235   ESCAPE :  51   Class :character  
+ Median :43130   Mode  :character   HONDA    :137   CRUZE  :  50   Mode  :character  
+ Mean   :43055                      KIA      :125   ODYSSEY:  41                     
+ 3rd Qu.:46348                      NISSAN   :114   SORENTO:  39                     
+ Max.   :98661                      HYUNDAI  :114   EQUINOX:  35                     
+ NA's   :7                          (Other)  :841   (Other):1595                     
+                  Dealer.Name  
+ Dave Arbogast Buick GMC: 264  
+ Coral Springs Buick    : 220  
+ Keystone Ford          :  83  
+ John Watson Chevrolet  :  80  
+ D&D Ford               :  75  
+ Bill Pearce Honda      :  68  
+ (Other)                :1072  
+   FirstName      MiddleInit       LastName                Address1               City          State    
+ MICHAEL:  42          :1086   SMITH   :  17                   :   6   CORAL SPRINGS: 123   OH     :462  
+ JOHN   :  34   A      :  28   JOHNSON :  11   WAPAKONETA      :   3   TROY         :  73   FL     :270  
+ ROBERT :  34   J      :  23   WILLIAMS:   9   LIMA            :   3   SAINT LOUIS  :  66   SC     :120  
+ JAMES  :  31   M      :  20           :   9   CELINA          :   3   TIPP CITY    :  51   GA     :117  
+ WILLIAM:  29   L      :  14   TAYLOR  :   9   5144 SLOPE DR   :   2   OGDEN        :  49   PA     :110  
+ DAVID  :  27   (Other): 121   BROWN   :   7   11190 NW 39TH ST:   2   MARGATE      :  42   (Other):771  
+ (Other):1665   NA's   : 570   (Other) :1800   (Other)         :1843   (Other)      :1458   NA's   : 12  
+      Zip5           Zip4                 Make1         Model1        Year1          
+ Min.   : 1079   Length:1862        CHEVROLET:296   FUSION :  51   Length:1862       
+ 1st Qu.:30075   Class :character   FORD     :235   ESCAPE :  51   Class :character  
+ Median :43130   Mode  :character   HONDA    :137   CRUZE  :  50   Mode  :character  
+ Mean   :43055                      KIA      :125   ODYSSEY:  41                     
+ 3rd Qu.:46348                      NISSAN   :114   SORENTO:  39                     
+ Max.   :98661                      HYUNDAI  :114   EQUINOX:  35                     
+ NA's   :7                          (Other)  :841   (Other):1595                     
+                  Dealer.Name  
+ Dave Arbogast Buick GMC: 264  
+ Coral Springs Buick    : 220  
+ Keystone Ford          :  83  
+ John Watson Chevrolet  :  80  
+ D&D Ford               :  75  
+ Bill Pearce Honda      :  68  
+ (Other)                :1072  
+> D51  <- read.csv("Data51.csv", sep=",")
+> D51  <- read.csv("Data51.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> D51[,c(5)] <- sapply(D51[,c(5)],as.character) 
+> D51[,c(5)] <- sapply(D51[,c(5)],as.character) 
+> D51[sapply(D51, is.factor)] <- lapply(D51[sapply(D51, is.factor)], as.character)
+> D51[sapply(D51, is.factor)] <- lapply(D51[sapply(D51, is.factor)], as.character)
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> D51[sapply(D51, is.factor)] <- lapply(D51[sapply(D51, is.factor)], as.character)
+> D51[sapply(D51, is.factor)] <- lapply(D51[sapply(D51, is.factor)], as.character)
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50) 
+> D51  <- read.csv("Data51.csv", sep=",")
+> D51  <- read.csv("Data51.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D51) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43331L, 45891L, 45895L, 45804L,  :
+  invalid factor level, NA generated
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55) 
+> D56  <- read.csv("Data56.csv", sep=",")
+> D56  <- read.csv("Data56.csv", sep=",")
+> D57  <- read.csv("Data57.csv", sep=",")
+> D57  <- read.csv("Data57.csv", sep=",")
+> D58  <- read.csv("Data58.csv", sep=",")
+> D58  <- read.csv("Data58.csv", sep=",")
+> D59  <- read.csv("Data59.csv", sep=",")
+> D59  <- read.csv("Data59.csv", sep=",")
+> D60  <- read.csv("Data60.csv", sep=",")
+> D60  <- read.csv("Data60.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D58  <- read.csv("Data58.csv", sep=",")
+> D58  <- read.csv("Data58.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60) 
+> D61  <- read.csv("Data61.csv", sep=",")
+> D61  <- read.csv("Data61.csv", sep=",")
+> D62  <- read.csv("Data62.csv", sep=",")
+> D62  <- read.csv("Data62.csv", sep=",")
+> D63  <- read.csv("Data63.csv", sep=",")
+> D63  <- read.csv("Data63.csv", sep=",")
+> D64  <- read.csv("Data64.csv", sep=",")
+> D64  <- read.csv("Data64.csv", sep=",")
+> D65  <- read.csv("Data65.csv", sep=",")
+> D65  <- read.csv("Data65.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D65  <- read.csv("Data65.csv", sep=",")
+> D65  <- read.csv("Data65.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65) 
+> D66  <- read.csv("Data66.csv", sep=",")
+> D66  <- read.csv("Data66.csv", sep=",")
+> D67  <- read.csv("Data67.csv", sep=",")
+> D67  <- read.csv("Data67.csv", sep=",")
+> D68  <- read.csv("Data68.csv", sep=",")
+> D68  <- read.csv("Data68.csv", sep=",")
+> D69  <- read.csv("Data69.csv", sep=",")
+> D69  <- read.csv("Data69.csv", sep=",")
+> D70  <- read.csv("Data70.csv", sep=",")
+> D70  <- read.csv("Data70.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70) 
+> D71  <- read.csv("Data71.csv", sep=",")
+> D71  <- read.csv("Data71.csv", sep=",")
+> D72  <- read.csv("Data72.csv", sep=",")
+> D72  <- read.csv("Data72.csv", sep=",")
+> D73  <- read.csv("Data73.csv", sep=",")
+> D73  <- read.csv("Data73.csv", sep=",")
+> D74  <- read.csv("Data74.csv", sep=",")
+> D74  <- read.csv("Data74.csv", sep=",")
+> D75  <- read.csv("Data75.csv", sep=",")
+> D75  <- read.csv("Data75.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75) 
+> D76  <- read.csv("Data76.csv", sep=",")
+> D76  <- read.csv("Data76.csv", sep=",")
+> D77  <- read.csv("Data77.csv", sep=",")
+> D77  <- read.csv("Data77.csv", sep=",")
+> D78  <- read.csv("Data78.csv", sep=",")
+> D78  <- read.csv("Data78.csv", sep=",")
+> D79  <- read.csv("Data79.csv", sep=",")
+> D79  <- read.csv("Data79.csv", sep=",")
+> D80  <- read.csv("Data80.csv", sep=",")
+> D80  <- read.csv("Data80.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80) 
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76) 
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76) 
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76) 
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+> D76 <- as.data.frame(D76)
+> D76 <- as.data.frame(D76)
+> D76 <- unname(D76)
+> D76 <- unname(D76)
+> D76 <- unname(D75)
+> D76 <- unname(D75)
+> D76  <- read.csv("Data76.csv", sep=",")
+> D76  <- read.csv("Data76.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76) 
+> D77  <- read.csv("Data77.csv", sep=",")
+> D77  <- read.csv("Data77.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77) 
+> D78  <- read.csv("Data78.csv", sep=",")
+> D78  <- read.csv("Data78.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78) 
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+Error in match.names(clabs, names(xi)) : 
+  names do not match previous names
+> D78  <- read.csv("Data78.csv", sep=",")
+> D78  <- read.csv("Data78.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78) 
+> D79  <- read.csv("Data79.csv", sep=",")
+> D79  <- read.csv("Data79.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79) 
+> D80  <- read.csv("Data80.csv", sep=",")
+> D80  <- read.csv("Data80.csv", sep=",")
+> D81  <- read.csv("Data81.csv", sep=",")
+> D81  <- read.csv("Data81.csv", sep=",")
+> D82  <- read.csv("Data82.csv", sep=",")
+> D82  <- read.csv("Data82.csv", sep=",")
+> D83  <- read.csv("Data83.csv", sep=",")
+> D83  <- read.csv("Data83.csv", sep=",")
+> D84  <- read.csv("Data84.csv", sep=",")
+> D84  <- read.csv("Data84.csv", sep=",")
+> D85  <- read.csv("Data85.csv", sep=",")
+> D85  <- read.csv("Data85.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D84  <- read.csv("Data84.csv", sep=",")
+> D84  <- read.csv("Data84.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85) 
+> D86  <- read.csv("Data86.csv", sep=",")
+> D86  <- read.csv("Data86.csv", sep=",")
+> D87  <- read.csv("Data87.csv", sep=",")
+> D87  <- read.csv("Data87.csv", sep=",")
+> D88  <- read.csv("Data88.csv", sep=",")
+> D88  <- read.csv("Data88.csv", sep=",")
+> D89  <- read.csv("Data89.csv", sep=",")
+> D89  <- read.csv("Data89.csv", sep=",")
+> D90  <- read.csv("Data90.csv", sep=",")
+> D90  <- read.csv("Data90.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D88  <- read.csv("Data88.csv", sep=",")
+> D88  <- read.csv("Data88.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90) 
+> D91  <- read.csv("Data91.csv", sep=",")
+> D91  <- read.csv("Data91.csv", sep=",")
+> D92  <- read.csv("Data92.csv", sep=",")
+> D92  <- read.csv("Data92.csv", sep=",")
+> D93  <- read.csv("Data93.csv", sep=",")
+> D93  <- read.csv("Data93.csv", sep=",")
+> D94  <- read.csv("Data94.csv", sep=",")
+> D94  <- read.csv("Data94.csv", sep=",")
+> D95  <- read.csv("Data95.csv", sep=",")
+> D95  <- read.csv("Data95.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D94,D95) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D94,D95) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43615L, 43606L, 43615L, 43615L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43615L, 43606L, 43615L, 43615L,  :
+  invalid factor level, NA generated
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D94) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D94) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43615L, 43606L, 43615L, 43615L,  :Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43615L, 43606L, 43615L, 43615L,  :
+  invalid factor level, NA generated
+
+  invalid factor level, NA generated
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D94) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D94) 
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43615L, 43606L, 43615L, 43615L,  :
+  invalid factor level, NA generated
+Warning message:
+In `[<-.factor`(`*tmp*`, ri, value = c(43615L, 43606L, 43615L, 43615L,  :
+  invalid factor level, NA generated
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95) 
+> D96  <- read.csv("Data96.csv", sep=",")
+> D96  <- read.csv("Data96.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96) 
+> D97  <- read.csv("Data97.csv", sep=",")
+> D97  <- read.csv("Data97.csv", sep=",")
+> D98  <- read.csv("Data98.csv", sep=",")
+> D98  <- read.csv("Data98.csv", sep=",")
+> D99  <- read.csv("Data99.csv", sep=",")
+> D99  <- read.csv("Data99.csv", sep=",")
+> D100  <- read.csv("Data100.csv", sep=",")
+> D100  <- read.csv("Data100.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100) 
+> D101  <- read.csv("Data101.csv", sep=",")
+> D101  <- read.csv("Data101.csv", sep=",")
+> D102  <- read.csv("Data102.csv", sep=",")
+> D102  <- read.csv("Data102.csv", sep=",")
+> D103  <- read.csv("Data103.csv", sep=",")
+> D103  <- read.csv("Data103.csv", sep=",")
+> D104  <- read.csv("Data104.csv", sep=",")
+> D104  <- read.csv("Data104.csv", sep=",")
+> D105  <- read.csv("Data105.csv", sep=",")
+> D105  <- read.csv("Data105.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105) 
+> D106  <- read.csv("Data106.csv", sep=",")
+> D106  <- read.csv("Data106.csv", sep=",")
+> D107  <- read.csv("Data107.csv", sep=",")
+> D107  <- read.csv("Data107.csv", sep=",")
+> D108  <- read.csv("Data108.csv", sep=",")
+> D108  <- read.csv("Data108.csv", sep=",")
+> D109  <- read.csv("Data109.csv", sep=",")
+> D109  <- read.csv("Data109.csv", sep=",")
+> D110  <- read.csv("Data110.csv", sep=",")
+> D110  <- read.csv("Data110.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D107  <- read.csv("Data107.csv", sep=",")
+> D107  <- read.csv("Data107.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D107  <- read.csv("Data107.csv", sep=",")
+> D107  <- read.csv("Data107.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D107  <- read.csv("Data107.csv", sep=",")
+> D107  <- read.csv("Data107.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D107  <- read.csv("Data107.csv", sep=",")
+> D107  <- read.csv("Data107.csv", sep=",")
+> str(D107)
+> str(D107)
+'data.frame':	325 obs. of  12 variables:
+ $ FirstName  : Factor w/ 245 levels "","ADAM","ADELAIDO",..: 14 37 173 105 136 109 184 89 236 233 ...
+ $ MiddleInit :'data.frame':	325 obs. of  12 variables:
+ $ FirstName  : Factor w/ 245 levels "","ADAM","ADELAIDO",..: 14 37 173 105 136 109 184 89 236 233 ...
+ $ MiddleInit : Factor w/ 13 levels "","A","D","E",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ LastName   : Factor w/ 290 levels "","ABALOS","ABOUD",..: 235 264 166 148 275 52 115 95 269 30 ...
+ $ Address1   : Factor w/ 312 levels "","1 STATES AVE",..: 2 35 39 46 48 50 56 59 64 72 ...
+ $ City       : Factor w/ 15 levels "","CEDAR HILL",..: 10 15 6 15 15 15 15 8 15 13 ...
+ $ State      : Factor w/ 2 levels "","TX": 2 2 2 2 2 2 2 2 2 2 ...
+ $ Zip5       : int  76065 75165 75154 75165 75165 75165 75165 75146 75165 75154 ...
+ $ Zip4       : int  6710 2706 8517 6426 5946 6081 3505 2263 7875 5123 ...
+ $ Make1      : Factor w/ 18 levels "","BUICK","CHEVROLET",..: 7 5 4 3 15 7 12 14 14 5 ...
+ $ Model1     : Factor w/ 104 levels "","200","300",..: 31 12 2 30 65 31 84 10 75 22 ...
+ $ Year1      : int  2012 2013 2013 2008 2014 2013 2012 2007 2014 2013 ...
+ $ Dealer.Name: Factor w/ 1 level "Waxahachie Chrysler Dodge Jeep": 1 1 1 1 1 1 1 1 1 1 ...
+ Factor w/ 13 levels "","A","D","E",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ LastName   : Factor w/ 290 levels "","ABALOS","ABOUD",..: 235 264 166 148 275 52 115 95 269 30 ...
+ $ Address1   : Factor w/ 312 levels "","1 STATES AVE",..: 2 35 39 46 48 50 56 59 64 72 ...
+ $ City       : Factor w/ 15 levels "","CEDAR HILL",..: 10 15 6 15 15 15 15 8 15 13 ...
+ $ State      : Factor w/ 2 levels "","TX": 2 2 2 2 2 2 2 2 2 2 ...
+ $ Zip5       : int  76065 75165 75154 75165 75165 75165 75165 75146 75165 75154 ...
+ $ Zip4       : int  6710 2706 8517 6426 5946 6081 3505 2263 7875 5123 ...
+ $ Make1      : Factor w/ 18 levels "","BUICK","CHEVROLET",..: 7 5 4 3 15 7 12 14 14 5 ...
+ $ Model1     : Factor w/ 104 levels "","200","300",..: 31 12 2 30 65 31 84 10 75 22 ...
+ $ Year1      : int  2012 2013 2013 2008 2014 2013 2012 2007 2014 2013 ...
+ $ Dealer.Name: Factor w/ 1 level "Waxahachie Chrysler Dodge Jeep": 1 1 1 1 1 1 1 1 1 1 ...
+> D107  <- read.csv("Data107.csv", sep=",")
+> D107  <- read.csv("Data107.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> D107  <- read.csv("Data107.csv", sep=",")
+> D107  <- read.csv("Data107.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> library(dplyr)
+> library(dplyr)
+> complete.dat <- bind_rows(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+> complete.dat <- bind_rows(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+Error: Can not automatically convert from integer to factor in column "Zip4".
+In addition: Warning messages:
+1: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+2: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+3: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+4: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+5: Error: Can not automatically convert from integer to factor in column "Zip4".
+In addition: Warning messages:
+1: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+2: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+3: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+4: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+5: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+6: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+7: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+8: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+9: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+6: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+7: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+8: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+9: In bind_rows_(x, .id) : Unequal factor levels: coercing to character
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106) 
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+Error in rbind(deparse.level, ...) : 
+  numbers of columns of arguments do not match
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105) 
+> D106  <- read.csv("Data106.csv", sep=",")
+> D106  <- read.csv("Data106.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106) 
+> D107  <- read.csv("Data107.csv", sep=",")
+> D107  <- read.csv("Data107.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107) 
+> D108  <- read.csv("Data108.csv", sep=",")
+> D108  <- read.csv("Data108.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108) 
+> D109  <- read.csv("Data109.csv", sep=",")
+> D109  <- read.csv("Data109.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109) 
+> D110  <- read.csv("Data110.csv", sep=",")
+> D110  <- read.csv("Data110.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110) 
+> D111  <- read.csv("Data111.csv", sep=",")
+> D111  <- read.csv("Data111.csv", sep=",")
+> D112  <- read.csv("Data112.csv", sep=",")
+> D112  <- read.csv("Data112.csv", sep=",")
+> D113  <- read.csv("Data113.csv", sep=",")
+> D113  <- read.csv("Data113.csv", sep=",")
+> D114  <- read.csv("Data114.csv", sep=",")
+> D114  <- read.csv("Data114.csv", sep=",")
+> D115  <- read.csv("Data115.csv", sep=",")
+> D115  <- read.csv("Data115.csv", sep=",")
+> D111  <- read.csv("Data111.csv", sep=",")
+> D111  <- read.csv("Data111.csv", sep=",")
+> D114  <- read.csv("Data114.csv", sep=",")
+> D114  <- read.csv("Data114.csv", sep=",")
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110,D111,D112,D113,D114,D115) 
+> complete.dat <- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110,D111,D112,D113,D114,D115) 
+> complete<- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110,D111,D112,D113,D114,D115) 
+> complete<- rbind(D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,D31,D32,D33,D34,D35,D36,D37,D38,D39,D40,D41,D42,D43,D44,D45,D46,D47,D48,D49,D50,D52,D53,D54,D55,D56,D57,D58,D59,D60,D61,D62,D63,D64,D65,D66,D67,D68,D69,D70,D71,D72,D73,D74,D75,D76,D77,D78,D79,D80,D81,D82,D83,D84,D85,D86,D87,D88,D89,D90,D91,D92,D93,D95,D96,D97,D98,D99,D100,D101,D102,D103,D104,D105,D106,D107,D108,D109,D110,D111,D112,D113,D114,D115) 
+> write.csv(complete[,1:12], "complete.csv", row.names = FALSE)
+> write.csv(complete[,1:12], "complete.csv", row.names = FALSE)

@@ -1,0 +1,255 @@
+Data7<- read.csv("Data3.csv", sep=",")
+View(Data7)
+Data8 <- subset(Data7, select=c(1,2,3,5,6))
+View(Data8)
+summary(Data8$Pass_FailR)
+index <- createDataPartition(Data8$Pass_FailR, p = 0.8, list=FALSE)
+train_tbl <- Data8[index,]
+test_tbl<- Data8[-index,]
+Data8 <- subset(Data7, select=c(1,2,3,5,6))
+summary(Data8$Pass_FailR)
+str(Data8)
+Data8$LabelR <- as.factor(Data8$LabelR)
+str(Data8)
+index <- createDataPartition(Data8$Pass_FailR, p = 0.8, list=FALSE)
+train_tbl <- Data8[index,]
+test_tbl<- Data8[-index,]
+rec_obj <- recipe(Pass_FailR ~ ., data = train_tbl) %>%
+step_dummy(all_nominal(), -all_outcomes()) %>%
+step_center(all_predictors(), -all_outcomes()) %>%
+step_scale(all_predictors(), -all_outcomes()) %>%
+prep(data = train_tbl)
+x_train_tbl <- bake(rec_obj, newdata = train_tbl)
+x_test_tbl  <- bake(rec_obj, newdata = test_tbl)
+y_train_vec <- ifelse(pull(train_tbl, Pass_FailR) == "TRUE", 1, 0)
+y_test_vec <- ifelse(pull(test_tbl, FullyFunded) == "TRUE", 1, 0)
+y_train_vec <- ifelse(pull(train_tbl, Pass_FailR) == "TRUE", 1, 0)
+y_test_vec <- ifelse(pull(test_tbl, Pass_FailR) == "TRUE", 1, 0)
+model_keras <- keras_model_sequential()
+model_keras %>%
+# First hidden layer
+layer_dense(
+units              = 16,
+kernel_initializer = "uniform",
+activation         = "relu",
+input_shape        = ncol(x_train_tbl)) %>%
+# Dropout to prevent overfitting
+layer_dropout(rate = 0.1) %>%
+# Second hidden layer
+layer_dense(
+units              = 16,
+kernel_initializer = "uniform",
+activation         = "relu") %>%
+# Dropout to prevent overfitting
+layer_dropout(rate = 0.1) %>%
+# Output layer
+layer_dense(
+units              = 1,
+kernel_initializer = "uniform",
+activation         = "sigmoid") %>%   # Compile ANN
+compile(
+optimizer = 'adam',
+loss      = 'binary_crossentropy',
+metrics   = c('accuracy')
+)
+model_keras
+fit_keras <- fit(
+object           = model_keras,
+x                = as.matrix(x_train_tbl),
+y                = y_train_vec,
+batch_size       = 50,
+epochs           = 35,
+validation_split = 0.30
+)
+fit_keras
+model_keras
+fit_keras <- fit(
+object           = model_keras,
+x                = as.matrix(x_train_tbl),
+y                = y_train_vec,
+batch_size       = 50,
+epochs           = 50,
+validation_split = 0.30
+)
+fit_keras
+model_keras
+fit_keras <- fit(
+object           = model_keras,
+x                = as.matrix(x_train_tbl),
+y                = y_train_vec,
+batch_size       = 50,
+epochs           = 50,
+validation_split = 0.20
+)
+fit_keras
+model_keras
+fit_keras <- fit(
+object           = model_keras,
+x                = as.matrix(x_train_tbl),
+y                = y_train_vec,
+batch_size       = 50,
+epochs           = 50,
+validation_split = 0.15
+)
+fit_keras
+model_keras
+fit_keras <- fit(
+object           = model_keras,
+x                = as.matrix(x_train_tbl),
+y                = y_train_vec,
+batch_size       = 50,
+epochs           = 50,
+validation_split = 0.18
+)
+fit_keras
+model_keras
+fit_keras <- fit(
+object           = model_keras,
+x                = as.matrix(x_train_tbl),
+y                = y_train_vec,
+batch_size       = 60,
+epochs           = 35,
+validation_split = 0.20
+)
+fit_keras
+plot(fit_keras) +
+theme_tq() +
+scale_color_tq() +
+scale_fill_tq() +
+labs(title = "Deep Learning Training Results")
+
+# Predicted Class
+yhat_keras_class_vec <- predict_classes(object = model_keras, x = as.matrix(x_test_tbl)) %>% as.vector()
+
+# Predicted Class Probability
+yhat_keras_prob_vec  <- predict_proba(object = model_keras, x = as.matrix(x_test_tbl)) %>% as.vector()
+
+# Format test data and predictions for yardstick metrics
+estimates_keras_tbl <- tibble(
+truth      = as.factor(y_test_vec) %>% fct_recode(yes = "1", no = "0"),
+estimate   = as.factor(yhat_keras_class_vec) %>% fct_recode(yes = "1", no = "0"),
+class_prob = yhat_keras_prob_vec
+)
+View(estimates_keras_tbl)
+estimates_keras_tbl
+options(yardstick.event_first = FALSE)
+# Confusion Table
+estimates_keras_tbl %>% conf_mat(truth, estimate)
+# Accuracy
+estimates_keras_tbl %>% metrics(truth, estimate)
+save.image("~/CodeForAllProjects/R/KnowData_Project/RCode-2-25.RData")
+savehistory("~/CodeForAllProjects/R/KnowData_Project/RCode-2-25.Rhistory")
+savehistory("~/CodeForAllProjects/R/KnowData_Project/Rcode.Rhistory")
+split_pct <- 0.85
+n <- nrow(training)
+sample_size <- floor(split_pct * n)
+set.seed(159)
+idx_train <- sample(1:n, size = sample_size)
+valid_raw_df <- training[-idx_train,]
+train_raw_df <- training[idx_train,]
+install.packages("h2o")
+library(h2o)
+library(h2o)
+h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+train_h2o <- as.h2o(train_raw_df)
+valid_h2o <- as.h2o(valid_raw_df)
+View(train_tbl)
+y <- "Pass_FailR"
+x <- setdiff(names(train_h2o), y)
+automl_models_h2o <- h2o.automl(
++     x = x,
++     y = y,
++     training_frame    = train_h2o,
++     validation_frame  = valid_h2o,
++     max_runtime_secs  = 45
++ )
+automl_models_h2o <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 45
+)
+View(valid_raw_df)
+View(train_raw_df)
+automl_models_h2o <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 20
+)
+View(train_raw_df)
+View(valid_raw_df)
+automl_models_h2o <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 20
+)
+View(Data3)
+View(Data2)
+Data5<- subset(Data2,select=c(1,2,3,4,5))
+index <- createDataPartition(Data5$Pass_Fail, p = 0.8, list=FALSE)
+training1 <- Data5[index,]
+testing1<- Data5[-index,]
+View(training1)
+split_pct <- 0.85
+n <- nrow(training1)
+sample_size <- floor(split_pct * n)
+set.seed(159)
+> idx_train <- sample(1:n, size = sample_size)
+valid_raw_df <- train2[-idx_train,]train_raw_df <- train2[idx_train,]
+set.seed(159)
+idx_train <- sample(1:n, size = sample_size)
+valid_raw_df <- training[-idx_train,]
+train_raw_df <- training[idx_train,]
+train_h2o <- as.h2o(train_raw_df)
+valid_h2o <- as.h2o(valid_raw_df)
+y <- "Pass_Fail"
+x <- setdiff(names(train_h2o), y)
+automl_models_h2o <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 45
+)
+View(training)
+View(train_raw_df)
+View(train_h2o)
+train1_h2o <- as.h2o(train_raw_df)
+valid1_h2o <- as.h2o(valid_raw_df)
+automl_models_h2o1 <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train1_h2o,
+validation_frame  = valid1_h2o,
+max_runtime_secs  = 45
+)
+valid_raw_df <- training1[-idx_train,]
+train_raw_df <- training1[idx_train,]
+train_h2o <- as.h2o(train_raw_df)
+valid_h2o <- as.h2o(valid_raw_df)
+y <- "Pass_Fail"
+x <- setdiff(names(train_h2o), y)
+automl_models_h2o <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 45
+)
+pred_h2o <- h2o.predict( automl_models_h2o, newdata = valid_h2o)
+test_h2o <- as.h2o(testing1)
+pred_h2o <- h2o.predict( automl_models_h2o, newdata = test_h2o)
+pred<- as.data.frame(pred_h2o)
+testing1<- cbind(testing1,pred)
+View(testing1)
+Acc_AutoML<- 1- (mean(testing1$Pass_Fail!= testing$predict))
+Acc_AutoML<- 1- (mean(testing1$Pass_Fail!= testing1$predict))
+Acc_AutoML
+automl_models_h2o@leader
+h2o.shutdown(Promt=true)
+h2o.shutdown(prompt=FALSE)

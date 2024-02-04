@@ -1,0 +1,95 @@
+> setwd("C:/NCC/NCC_Budget")
+> Budget <- read.csv("CreditReportRevenue_Volume.csv", sep=",")
+> View(Budget)
+> BudgetFC<- sqldf("SELECT max(revenue), min(revenue), avg(revenue), median(revenue), sum(revenue), min(volume), avg(volume),median(volume), max(volume),sum(volume) FROM Budget group by client_code, category")
+> View(BudgetFC)
+> View(BudgetFC)
+> View(Budget)
+> View(Budget)
+> BudgetFC<- sqldf("SELECT client_code, category, accounting_period,max(revenue), min(revenue), avg(revenue), median(revenue), sum(revenue), min(volume), avg(volume),median(volume), max(volume),sum(volume) FROM Budget group by client_code, category")
+> View(BudgetFC)
+> BudgetFC_EX<- sqldf("SELECT * FROM BudgetFC where category='Experian' group by client_code, category")
+> BudgetFC_EQ<- sqldf("SELECT * FROM BudgetFC where category='Equifax' group by client_code, category")
+> BudgetFC_TU<- sqldf("SELECT * FROM BudgetFC where category='TransUnion' group by client_code, category")
+> write.csv(BudgetFC_EX[,1:13], "BudgetFC_EX.csv", row.names = FALSE)
+> write.csv(BudgetFC_EQ[,1:13], "BudgetFC_EQ.csv", row.names = FALSE)
+> write.csv(BudgetFC_TU[,1:13], "BudgetFC_TU.csv", row.names = FALSE)
+> View(BudgetFC_EX)
+> rdate<- as.Date(BudgetFC_EX$accounting_period,"%m/%d/%Y")
+> fix(rdate)
+> plot(BudgetFC_EX$`sum(revenue)`~rdate,type='l',col='red')
+> library(xts)
+> library(forecast)
+> library(lubridate)
+> library(ggplot2)
+> BudgetFC_EX$Date <- as.Date(BudgetFC_EX$accounting_period,"%m/%d/%Y")
+> BudgetFC_EX_xts <- xts(x=BudgetFC_EX$`sum(revenue)`, order.by=BudgetFC_EX$Date)
+> monthly <- apply.monthly(BudgetFC_EX_xts,mean)
+> quarterly <- apply.quarterly(BudgetFC_EX_xts,mean)
+> plot(monthly)
+> plot(quarterly)
+> quarterly <- apply.quarterly(BudgetFC_EX_xts,mean)
+> str(monthly)
+> BudgetFC_end <- floor(0.8*length(monthly))
+> Train <- monthly[1:BudgetFC_end]
+> Test <- monthly[(BudgetFC_end +1):length(monthly)]
+> Bud.start <- c(year(start(Train)),month(start(Train)))
+> Bud.end <- c(year(end(Train)),month(end(Train)))
+> Train <- ts(as.numeric(Train), start=Bud.start, end=Bud.end, frequency = 12)
+> abline(reg=lm(monthly)~time(monthly))
+> Bud.start <- c(year(start(Test)),month(start(Test)))
+> Bud.end <- c(year(end(Test)),month(end(Test)))
+> Test <- ts(as.numeric(Test), start=Bud.start, end=Bud.end, frequency = 12)
+> forecast.horizon <- length(Test)
+
+
+library(tseries)
+plot(diff(log(Train)))
+plot(diff(log(monthly)))
+acf(monthly)
+> acf(monthly, na.action = na.pass)
+> acf(diff(log(monthly)),na.action = na.pass)
+ # The line where the values are inverted ar 1st line..prior to that is 0. So q=0
+> pacf(diff(log(monthly)),na.action = na.pass)
+> # The line where the values are inverted ar 8th line..prior to that is 7. So p=7
+> # We have differentiated only 11 so d=1
+
+
+> plot(monthly)
+> plot(test3$sum_revenue,test3$accounting_period_R)
+> plot(test3$accounting_period_R,test3$sum_revenue)
+> y <- test3$sum_volume
+> d.y <- diff(y)
+> plot(d.y)
+> t <- test3$accounting_period_R
+> plot(t,y)
+> adf.test(y,alternative="stationary", k=0)
+fit <- arima(y, order=c(7,0,1))
+fit
+
+>> #Call:
+> #arima(x = monthly, order = c(7, 0, 1))
+
+># Coefficients:
+>#         ar1     ar2     ar3      ar4     ar5     ar6      ar7      ma1   intercept
+>#      0.5709  0.0674  0.3458  -0.2069  0.0475  0.0196  -0.2002  -1.0000  10190.6577
+s>#.e.  0.1663  0.1898  0.1860   0.1914  0.1847  0.1854   0.1716   0.0939    250.8714
+
+># sigma^2 estimated as 25964857:  log likelihood = -359.94,  aic = 739.89
+
+pred <- predict(fit,n.ahead = 1*12)
+peed
+
+> plot(diff(log(monthly)))
+> acf(monthly, na.action = na.pass)
+> pacf(diff(log(monthly)),na.action = na.pass)
+# AR I MA --Auto Regressive Integral Moving Average
+# p  d  q
+
+> acf(monthly, na.action = na.pass)
+> acf(diff(log(monthly)),na.action = na.pass)
+> pacf(diff(log(monthly)),na.action = na.pass)
+> fit <- arima(y, order=c(7,0,1))
+> fit
+> pred <- predict(fit,n.ahead = 1*12)
+> pred

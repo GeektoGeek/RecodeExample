@@ -1,0 +1,407 @@
+ setwd("~/algt_puzzles/puzzle_3")
+ sensor<- read.csv("sensor_data.csv", sep=",")
+ View(sensor)
+ weather<- read.csv("weather_data.csv", sep=",")
+ View(weather)
+ bat_signal<- read.csv("bat_signal_data.csv", sep=",")
+ moon_phases<- read.csv("moon_phases_data.csv", sep=",")
+
+install.packages("sqldf")
+library(sqldf)
+## Run the summary statistics to check if there are missing values
+summary(sensor)
+summary(weather)
+summary(bat_signal)
+summary(moon_phases)
+
+ ### Clearly no missing data
+ ### Combine moon_phases and weather
+ View(weather)
+ moonweather<- sqldf(" select a.*, b.* from moon_phases a inner join weather b on a.Timestamp=b.Timestamp")
+ View(moonweather)
+ View(sensor)
+ View(moon_phases)
+ View(moonweather)
+ monnweatherC<-subset(moonweather, select=c(1,2,4,5,6))
+ View(monnweatherC)
+ moonweatherbat<- sqldf("select a.*, b.* from bat_signal a inner join monnweatherC b on a.Timestamp=b.Timestamp")
+ View(moonweatherbat)
+ View(moonweatherbat)
+ moonweathersensor<- sqldf("select a.*, b.* from sensor a inner join monnweatherC b on a.Timestamp=b.Timestamp")
+ View(moonweathersensor)
+ ### Clearly this does not include the bat signal
+ ### The bat_signal data source is not connected
+ moonweathersensorbat<- sqldf("select a.*, b.* from moonweathersensor a inner join bat_signal b on a.Timestamp=b.Timestamp")
+ View(moonweathersensorbat)
+
+
+
+#### Clearly with inner join we are missing a lot of data
+### Build it as left join
+
+ ## Step 1: weather and moon_phase
+ weathermoon<- sqldf("select a.*, b.* from weather a left join moon_phases b on a.Timestamp=b.Timestamp")
+ View(weathermoon)
+ ### Clean the data-set
+ weathermoonC<-subset(weathermoon, select=c(1,2,3,4,6))
+ View(weathermoonC)
+ View(weathermoonC)
+ ### Step 2 : sesnsor and  weathermoonC
+ sensormoonweather<- sqldf("select a.*, b.* from sensor a left join weathermoonC b on a.Timestamp=b.Timestamp")
+ View(sensormoonweather)
+ View(weathermoonC)
+ View(sensormoonweather)
+ ### Clean the data-set
+ sensormoonweather$TimestampWeaMoon<-sensormoonweather$Timestamp..8
+ View(sensormoonweather)
+ sensormoonweather<-subset(sensormoonweather, select=c(-8))
+ View(sensormoonweather)
+ sensormoonweatherbat<-sqldf("select a.*, b.* from sensormoonweather a left join bat_signal b on a.Timestamp=b.Timestamp")
+ View(sensormoonweatherbat)
+ sensormoonweatherbat$timestampbatsig<-sensormoonweatherbat$Timestamp..13
+ ### Clean the data-set
+ sensormoonweatherbat<-subset(sensormoonweatherbat, select=c(-13))
+
+FinalDF<-sensormoonweatherbat 
+
+summary(FinalDF$jokerpresent)
+#    no    yes 
+# 227812   8762 
+
+install.packages("plyr")
+library(plyr)
+
+FinalDF$jokerpresentR<- FinalDF$jokerpresent
+FinalDF$jokerpresentR <- mapvalues(FinalDF$jokerpresentR,from = c("no","yes"), to = c(0,1))
+View(sensormoonweatherbat)
+View(FinalDF)
+str(FinalDF)
+
+countpre<-sqldf("select count(precip), precip from FinalDF group by precip")
+ View(countpre)
+ countpre<-sqldf("select count(precip), precip from FinalDF")
+ View(FinalDF)
+ countpre<-sqldf("select count(precip), precip from FinalDF group by precip")
+ View(countpre)
+ View(FinalDF)
+ FinalDF$precipR<-FinalDF$precip
+ View(FinalDF)
+ View(countpre)
+ FinalDF$precipR <- mapvalues(FinalDF$precipR,from = c("no","rain","snow"), to = c(0,1,2))
+ View(FinalDF)
+ countpre1R<-sqldf("select count(precip), precipR from FinalDF group by precipR")
+ View(countpre1R)
+ View(FinalDF)
+ FinalDF$skyconditionsR<-FinalDF$skyconditions
+ countskycond<-sqldf("select count(skyconditions), skyconditions from FinalDF group by skyconditions")
+ View(countskycond)
+ FinalDF$skyconditionsR <- mapvalues(FinalDF$skyconditionsR,from = c("clear","cloudy","partly cloudy"), to = c(2,1,0))
+ View(FinalDF)
+ countskycond1<-sqldf("select count(skyconditionsR), skyconditionsR from FinalDF group by skyconditionsR")
+ View(countskycond1)
+ View(FinalDF)
+ FinalDF$phaseR<-FinalDF$phase
+ countphase<-sqldf("select count(phase), phase from FinalDF group by phase")
+ View(countphase)
+
+ FinalDF$phaseR <- mapvalues(FinalDF$phaseR,from = c("first quarter","full moon","last quarter","new","waning crescent","waning gibbous","waxing crescent","waxing gibbous"), to = c(0,1,2,3,4,5,6,7))
+
+ ### Now clean the data before starting the imputation
+ DF<- subset(FinalDF, select=c(1,2,3,4,5,6,15,8,16,17,18))
+ View(DF)
+ #### Now make sure to change the recoded variable to Factors
+
+ DF$jokerpresentR<- as.factor(DF$jokerpresentR)
+ DF$precipR<-as.factor(DF$precipR)
+ DF$skyconditionsR<- as.factor(DF$skyconditionsR)
+ DF$phaseR<- as.factor(DF$phaseR)
+
+## Divide the dataset into training and test
+
+install.packages("caret")
+library(caret)
+
+ a <- createDataPartition(DF$jokerpresentR, p = 0.8, list=FALSE)
+ training <- DF[a,]
+ testing<- DF[-a,]
+
+library(Amelia)
+library(mice)
+library(ggplot2)
+library(lattice)
+
+### Perform the imputation based on the original distribution of the each variable using a CART imputation technique
+
+### Ensure that the distribution of the imputed variable match with the original distribution
+
+ imp.train_raw <- mice(training, m=1, method='cart', printFlag=FALSE)
+ imp.test_raw <- mice(testing, m=1, method='cart', printFlag=FALSE)
+ densityplot(imp.train_raw, ~temperature)
+ densityplot(imp.train_raw, ~precipR)
+ densityplot(imp.train_raw, ~skyconditionsR)
+ train_complete <- complete(imp.train_raw)
+ View(train_complete)
+ test_complete <- complete(imp.test_raw)
+
+ ### Ensure no NAs are present
+sum(sapply(train_complete, function(x) { sum(is.na(x)) }))
+sum(sapply(test_complete, function(x) { sum(is.na(x)) }))
+
+training<- train_complete
+testing<- test_complete
+
+### Run some correlations 
+library("PerformanceAnalytics")
+library("PerformanceAnalytics")
+## Select the variables
+Corr<- subset(training, select=c(2,3,4,5,6,7,8,9,10,11))
+Corr1<- cor(Corr[,unlist(lapply(Corr, is.numeric))])
+chart.Correlation(Corr1, histogram=TRUE, pch=19)
+
+
+ ### Split the training data into train and validation
+ 
+ ### Split the data
+ 
+library(caret)
+a1 <- createDataPartition(training$jokerpresentR,p = 0.8,list=FALSE)
+train <- training[a1,]
+valid<- training[-a1,]
+
+### Let's use h2o so that we can use AutoML package for building the ML models
+
+install.packages("h2o")
+library(h2o)
+
+h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+
+train_h2o <- as.h2o(train)
+valid_h2o <- as.h2o(valid)
+test_h2o <- as.h2o(testing)
+
+### There will be two prediction problem 1) Classification to see if Joker is present
+### 2) Regression to predict if thugs are present
+
+### AutoML framework incorporates multiple models such as Distributed random Forest, GBM, GLM, GBM Grid Search, Deep Learning, Stacked ensemble, etc.
+
+
+### In this way, all the above models will be trained simultaneously
+
+### Best performing models i.e., leader model will be selected for prediction among all the state of art-models
+
+ y <- "jokerpresentR"
+ x <- setdiff(names(train_h2o), c(y, "Timestamp"))
+
+set.seed(1000)
+automl_models_h2o <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 999999999,
+max_models=15,
+seed=1
+)
+
+### Find out the leader model
+
+lb <- automl_models_h2o@leaderboard
+print(lb, n = nrow(lb))
+
+
+automl_models_h2o@leader
+
+ ### Predict
+ pred_h2o <- h2o.predict( automl_models_h2o@leader, newdata = test_h2o)
+  
+ pred<- as.data.frame(pred_h2o)
+ 
+ 
+ View(pred)
+ View(testing)
+ testing<- cbind(testing,pred)
+ View(testing)
+
+ ### Checking predicted accuracy in the test dataset
+ Accuracy_AMLeader<- 1- (mean(testing$jokerpresentR!= testing$predict))
+ Accuracy_AMLeader
+ ## [1] 0.9071522
+
+ ### Confusion Metrix
+ table(testing$jokerpresentR, testing$predict)
+   
+#        0     1
+#  0 42613  2949
+#  1  1444   308
+
+ h2o.auc(automl_models_h2o@leader) 
+
+
+
+### Let's run the GBM i.e., with a balance class setting true balance_class as the data is high imbalance...
+### h2o take care of this either by oversampling or undersampling to make it best
+
+cov_gbm <- h2o.gbm(x = x, y = y, training_frame = train_h2o,
+validation_frame = valid_h2o, balance_classes = TRUE, seed = 1234)
+
+print(h2o.logloss(cov_gbm, valid = TRUE))
+
+# grid over `balance_classes` (boolean parameter)
+
+# select the values for `balance_classes` to grid over
+
+### Let's do some 
+
+hyper_params <- list(balance_classes = c(TRUE, FALSE))
+
+hyper_params
+# build grid search with previously made GBM and hyperparameters
+
+grid <- h2o.grid(x = x, y = y, training_frame = train_h2o, validation_frame = valid_h2o,algorithm = "gbm", grid_id = "covtype_grid", hyper_params = hyper_params,search_criteria = list(strategy = "Cartesian"), seed = 1234)
+
+gbm_gridperf <- h2o.getGrid(grid_id = "covtype_grid", 
+                            sort_by = "auc", 
+                            decreasing = TRUE)
+print(gbm_gridperf)
+
+ # Grab the model_id for the top GBM model, chosen by validation AUC
+ best_gbm_model_id <- gbm_gridperf@model_ids[[1]]
+ best_gbm <- h2o.getModel(best_gbm_model_id)
+ 
+ # Now let's evaluate the model performance on a test set
+ # so we get an honest estimate of top model performance
+ best_gbm_perf <- h2o.performance(model = best_gbm,newdata = test_h2o)
+
+ h2o.auc(best_gbm_perf) 
+## [1] 0.6405382
+
+### Clearly the performance AUC improved a lot
+
+### Let's do the prediction with Grid Search tuned model in the test data-set
+
+pr <- h2o.predict(best_gbm, newdata = test_h2o)
+
+pr<- as.data.frame(pr)
+
+testing3<-subset(testing, select=c(1:11))
+
+testing3<- cbind(testing3,pr)
+table(testing3$jokerpresentR, testing3$predict)
+   
+#        0     1
+#  0 45340   222
+#  1  1609   143
+
+Acc<- 1- (mean(testing3$jokerpresentR!= testing3$predict))
+Acc
+
+model <- glm(jokerpresentR ~ x+y+z+numberofcitizens+numberofthugs+temperature+precipR+skyconditionsR+phaseR,family=binomial(link='logit'),data=train)
+
+ summary(model)
+
+##Call:
+###glm(formula = jokerpresentR ~ x + y + z + numberofcitizens + 
+###    numberofthugs + temperature + precipR + skyconditionsR + 
+###    phaseR, family = binomial(link = "logit"), data = train)
+
+### Deviance Residuals: 
+###    Min       1Q   Median       3Q      Max  
+### -0.6000  -0.2837  -0.2613  -0.2415   2.7567  
+
+### Coefficients:
+###                   Estimate Std. Error z value Pr(>|z|)    
+### (Intercept)      -2.950e+00  9.921e-02 -29.734  < 2e-16 ***
+### x                 1.955e-02  1.777e-02   1.100    0.271    
+### y                 2.103e-01  1.784e-02  11.785  < 2e-16 ***
+### z                -2.424e-02  1.779e-02  -1.363    0.173    
+### numberofcitizens -4.894e-05  6.745e-06  -7.257 3.97e-13 ***
+### numberofthugs     9.232e-03  1.204e-03   7.668 1.74e-14 ***
+### temperature       4.596e-04  9.079e-04   0.506    0.613    
+### precipR1          2.273e-03  3.733e-02   0.061    0.951    
+### precipR2          4.215e-02  4.429e-02   0.952    0.341    
+### skyconditionsR1  -1.997e-02  3.834e-02  -0.521    0.603    
+### skyconditionsR2   1.876e-02  3.263e-02   0.575    0.565    
+### phaseR1           2.807e-02  5.455e-02   0.515    0.607    
+### phaseR2           3.913e-02  5.445e-02   0.719    0.472    
+### phaseR3           7.835e-02  5.321e-02   1.472    0.141    
+### phaseR4           5.929e-04  5.550e-02   0.011    0.991    
+### phaseR5          -5.757e-03  5.493e-02  -0.105    0.917    
+### phaseR6          -2.619e-02  5.412e-02  -0.484    0.628    
+### phaseR7           2.190e-02  5.453e-02   0.402    0.688    
+---
+## Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+##    Null deviance: 47971  on 151407  degrees of freedom
+## Residual deviance: 47211  on 151390  degrees of freedom
+## AIC: 47247
+
+## Number of Fisher Scoring iterations: 6
+
+### Let's do the second prediction problem
+
+ y <- "numberofthugs"
+ x <- setdiff(names(train_h2o), c(y, "Timestamp"))
+ View(testing)
+ set.seed(1000)
+
+ au <- h2o.automl(
+     x = x,
+     y = y,
+     training_frame    = train_h2o,
+     validation_frame  = valid_h2o,
+     max_runtime_secs  = 999999999,
+     max_models=12,
+     seed=1
+ )
+
+ lb1 <- au@leaderboard
+ print(lb1, n = nrow(lb1))
+
+ pred_thugs <- h2o.predict( au@leader, newdata = test_h2o)
+ pred_thugs<- as.data.frame(pred_thugs)
+ pred_thugs<- round(pred_thugs, digits=0)
+ View(pred_thugs)
+ View(testing)
+ testing<- cbind(testing,pred_thugs)
+
+ perf <- h2o.performance(au@leader, test_h2o)
+ perf
+
+### Various important features and outcomes of this dataset, and why it’s valuable to Batman
+### Plot the variable importance plot from the leader model
+plot1 <- as.data.frame(h2o.varimp(au@leader))
+View(plot1)
+h2o.varimp_plot(au@leader)
+
+### Run a glm to check the statistical significance with the predictors and Numberofthugs
+
+m1<-lm(numberofthugs~numberofcitizens+jokerpresentR+temperature+precipR+skyconditionsR+phaseR,data=training)
+
+ml
+
+#                   Estimate Std. Error  t value Pr(>|t|)    
+#(Intercept)       3.542e+01  1.281e-01  276.442   <2e-16 ***
+#numberofcitizens -2.870e-03  8.257e-06 -347.525   <2e-16 ***
+#jokerpresentR1    1.798e+00  1.048e-01   17.163   <2e-16 ***
+#temperature      -1.370e-04  1.320e-03   -0.104    0.917    
+#precipR1         -5.996e-03  5.449e-02   -0.110    0.912    
+#precipR2          2.195e-03  6.465e-02    0.034    0.973    
+#skyconditionsR1  -8.328e-02  5.568e-02   -1.496    0.135    
+#skyconditionsR2   8.687e-03  4.652e-02    0.187    0.852    
+#phaseR1           5.167e-02  7.872e-02    0.656    0.512    
+#phaseR2          -7.643e-02  7.903e-02   -0.967    0.333    
+#phaseR3          -6.513e-02  7.735e-02   -0.842    0.400    
+#phaseR4          -2.980e-02  7.846e-02   -0.380    0.704    
+#phaseR5           3.397e-02  7.887e-02    0.431    0.667    
+#phaseR6          -5.447e-02  7.711e-02   -0.706    0.480    
+#phaseR7           3.255e-02  7.869e-02    0.414    0.679    
+
+
+
+
+
+
+
+

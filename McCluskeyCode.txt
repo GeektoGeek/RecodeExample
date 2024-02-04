@@ -1,0 +1,401 @@
+> setwd("H:/Analysis/McCluskey-Analysis")
+> # Change some of format in CSV whereever possible before preprocessing in R
+> test3 <- as.data.frame(test2)
+>  View(test3)
+> str(test3)
+> # Changing the Credit Score to Integer
+> test3$CBScore_R <- test3$CBScore
+> # library(plyr)
+> test3$CBScore_R <- data.matrix(test3$CBScore)
+> test3$CBScore_R <- as.numeric(as.character(test3$CBScore_R))
+> # Warning message: NAs introduced by coercion 
+> > test3$New_UsedR <- data.matrix(test3$New_Used)
+> test3$New_UsedR <- mapvalues(test3$New_UsedR, from = c("U","N"), to = c(0,1))
+> str(test3)
+> summary(test3$Tier)
+> #                < 619 NADA Trade 
+> #                  569          1          8 
+> summary(test3$DealType)
+>#         Cash        Retail   Static Cash  Static Lease Static Retail 
+>#            1             9            85            59           424 
+> summary(test3$DealType)
+         Cash        Retail   Static Cash  Static Lease Static Retail 
+            1             9            85            59           424 
+> # Recoding the Deal Type
+> test3$DealType_R <- test3$DealType
+> test3$DealType_R <- mapvalues(test3$DealType_R, from = c("Cash","Retail","Static Cash","Static Lease","Static Retail"), to = c(0,1,2,3,4))
+> str(test3)
+> test3$DealMake_R <- test3$DelMake
+> str(test3)
+> # Change Chevrolet to 1 and all other Make to 0
+> library(sqldf)
+> test3<- sqldf("SELECT *, CASE WHEN DealMake_R1 = 'Chevrolet' THEN 1 ELSE 0 END AS DealMake_R1 FROM test3")
+> # If sql does not work here is the alternative method to Change Chevrolet to 1 and all other Make to 0
+> test3$DealMake_R3 = ifelse(test3$DealMake_R3 %in% c("Chevrolet"),1,0)
+> # Also create another level Chevrolet=1, Hord=2, Honda=3, Toyota=4 and All other =5 for multinomial regression
+> test3$DealMake_R4 = ifelse(test3$DealMake_R4 %in% c("Chevrolet"),1, ifelse(test3$DealMake_R4 %in% c("Ford"),2, ifelse(test3$DealMake_R4 %in% c("Honda"),3, ifelse(test3$DealMake_R4 %in% c("Toyota"),4,5))))
+
+> # If you added an unnecessary column (say 29th column) look it up with str and delete it
+> str(test3)
+> test3 <- subset(test3, select = -29 )
+> summary(test3$Term)
+>#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+>#   0.00   39.00   66.00   52.91   72.00   87.00 
+
+># Do some Feature Engineering with Term
+> test3$AmtFinancd_gtMean <- test3$AmtFinancd
+> test3$AmtFinancd_gtMed <- test3$AmtFinancd
+> test3$AmtFinancd_gt3Qu <- test3$AmtFinancd
+
+> test3$AmtFinancd_gtMean <- ifelse((test3$AmtFinancd_gtMean >= 21921),1,0)
+> test3$AmtFinancd_gtMed <- ifelse((test3$AmtFinancd_gtMed >= 21324),1,0)
+> test3$AmtFinancd_gt3Qu <- ifelse((test3$AmtFinancd_gt3Qu >= 29731),1,0)
+
+># summary(test3$Price)
+>#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+>#    100   16370   23092   25710   31055   81833 
+> test3$Price_gtMean <- test3$Price
+> test3$Price_gtMed <- test3$Price
+> test3$Price_gt3Qu <- test3$Price
+
+> test3$Price_gtMean <- ifelse((test3$Price_gtMean >= 25710),1,0)
+> test3$Price_gtMed <- ifelse((test3$Price_gtMed >= 23092),1,0)
+> test3$Price_gt3Qu <- ifelse((test3$Price_gt3Qu >= 31055),1,0)
+
+> summary(test3$CashDown)
+>#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      0       0     200    1461    1500   32000 
+> test3$CashDown_Mean <- test3$CashDown
+> test3$CashDown_Med <- test3$CashDown
+> test3$CashDown_3Qu <- test3$CashDown
+> test3$CashDown_Mean <- ifelse((test3$CashDown_Mean >= 1461),1,0)
+> test3$CashDown_Med <- ifelse((test3$CashDown_Med >= 200),1,0)
+> test3$CashDown_3Qu <- ifelse((test3$CashDown_3Qu >= 1500),1,0)
+
+> # Do the same thing for Vehicle Year
+> summary(test3$DelYr)
+>#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+>#   1988    2014    2017    2015    2017    2018 
+># Note 3rd Q and Median values are same so we don't need 3rd Qu
+> test3 <- subset(test3, select = -45 )
+> test4 <- test3
+
+# Do the BagImpute for the Missing CBScore
+> test4$DealMake_R1.1<- as.factor(test4$DealMake_R1.1)
+> test4$Price <- as.factor(test4$Price)
+> test4$Term <- as.factor(test4$Term)
+> test4$CashDown <- as.factor(test4$CashDown)
+> test4$RateOrAPR <- as.factor(test4$RateOrAPR)
+> test4$DelYr <- as.factor(test4$DelYr)
+> test4$ZipCode <- as.factor(test4$ZipCode)
+> test4$Model <- as.factor(test4$DelModel)
+> library(caret)
+
+
+> str(test4)
+'data.frame':	578 obs. of  9 variables:
+ $ CBScore_R1: Factor w/ 2 levels "N","Y": 1 1 2 2 1 1 1 1 2 2 ...
+ $ DelMake   : Factor w/ 24 levels "BMW","Buick",..: 4 4 4 4 4 24 1 4 4 4 ...
+ $ DelModel  : Factor w/ 117 levels "3 Series","300",..: 94 94 41 93 27 13 1 15 15 15 ...
+ $ AmtFinancd: Factor w/ 489 levels "0","4475.55",..: 139 101 338 1 303 273 9 309 1 1 ...
+ $ CashDown  : Factor w/ 80 levels "0","30","99",..: 31 58 1 1 13 1 42 5 1 13 ...
+ $ Lender    : Factor w/ 54 levels "1st Investors",..: 35 25 33 33 25 24 35 4 33 33 ...
+ $ RateOrAPR : Factor w/ 286 levels "0","1.5","1.69",..: 276 84 1 1 69 24 276 79 1 1 ...
+ $ Price     : Factor w/ 539 levels "100","2705","2719",..: 144 113 383 28 235 262 29 302 451 442 ...
+ $ Term      : Factor w/ 20 levels "0","1","24","36",..: 10 12 2 1 13 12 7 17 1 1 ...
+
+> # Eliminate the Make because that is some point we are going to model it out 
+> # features1 <- c("CBScore_R1","AmtFinancd","CashDown","Lender","RateOrAPR","Price","Term")
+> # test4 <- test4[,features]
+> # View(test4)
+> # View(test4)
+> # test4 <- test4[,features1]
+> # View(test4)
+> # View(test4)
+> # str(test4)
+> # dummy.vars <- dummyVars(~.,data=test4)
+> # train.dummy <- predict(dummy.vars,test4)
+> # View(train.dummy)
+> # pre.process <- preProcess(train.dummy, method= 'bagImpute')
+> # This process of Bag Impute did not work due to lack of memory and RAM
+
+> test5 <- test3
+> CBScore_R2 <- rpart( CBScore_R2~ Price + Term + RateOrAPR + AmtFinancd + CashDown + DelYr, data=test5[!is.na(test5$CBScore_R2),], method="anova")
+> test5$CBScore_R2[is.na(test5$CBScore_R2)] <- predict(CBScore_R2, test5[is.na(test5$CBScore_R2),])
+> summary(test5$CBScore_R2)
+> summary(test5$CBScore_R2)
+
+>#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+>#  409.0   578.5   700.5   674.4   743.6   882.0 
+> summary(test5$CBScore_R)
+>#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+>#  409.0   580.2   670.5   667.7   752.0   882.0     184 
+># The imputation change the mean to 674 compared to 667
+
+># Pull all the max, min, avg and median for the Full July Data (All Zip)
+># R crashed so starting new from the saved dateset test3 again
+ test5<- sqldf("SELECT max(CBScore_R), min(CBScore_R), avg(CBScore_R), median(CBScore_R), max(CashDown), min(CashDown), avg(CashDown),median(CashDown), max(AmtFinancd),min(AmtFinancd),avg(AmtFinancd),median(AmtFinancd),max(Price), min(Price),avg(price), median(Price),max(Term),min(Term), avg(Term),median(Term) FROM test4")
+> dt <- data.table(test5)
+> View(dt)
+
+> # Query to pick the 61 rows for the car Makes for the Zip Code McCluskey want to market
+test9<- sqldf("SELECT * FROM test8 where (ZipCode= 45034 OR ZipCode= 45039 OR ZipCode= 45040 OR ZipCode= 45065 OR ZipCode=45152 OR ZipCode=45249 OR ZipCode=45162) order by ZipCode")
+
+# How to extract the all the rows which does not belong to the above ZipCodes of 61 rows
+test11<- sqldf("SELECT * FROM test8 except select * FROM test8 where ZipCode = 45034 OR ZipCode = 45039 OR ZipCode = 45040 OR ZipCode = 45065 OR ZipCode =45152 OR ZipCode = 45249 OR ZipCode = 45162 order by ZipCode")
+> View(test11)
+
+># Query to calculate the min, median, mean, max for the preferred Zip codes 
+test12<- sqldf("SELECT max(CBScore_R), min(CBScore_R), avg(CBScore_R), median(CBScore_R), max(CashDown), min(CashDown), avg(CashDown),median(CashDown), max(AmtFinancd),min(AmtFinancd),avg(AmtFinancd),median(AmtFinancd),max(Price), 
+min(Price),avg(price), median(Price),max(Term),min(Term), avg(Term),median(Term) FROM test9")
+dt1 <- data.table(test12)
+> View(test12)
+> write.csv(test12[,1:20], "test12.csv", row.names = FALSE)
+
+> # Started coding in the home computer over the weekend
+> The entire monthly dataset is Test1 now
+
+># Develop different Imputation for Credit Score Variable
+> Test1$CBScore_R1 <- Test$CBScore_R
+> summary(Test1$CBScore_R)
+  Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+  409.0   580.2   670.5   667.7   752.0   882.0     184 
+> Test1$CBScore_R1[which(is.na(Test1$CBScore_R1))] <- 667
+
+> Test1$CBScore_R2 <- Test$CBScore_R
+> Test1$CBScore_R2[which(is.na(Test1$CBScore_R2))] <- 670
+
+> Test1$CBScore_R3<- Test$CBScore_R
+> # Replacing R3 with a regresssion imputation
+> library(rpart)
+> CBScore_R3 <- rpart( CBScore_R3~ Price + RateOrAPR + AmtFinancd + CashDown, data=Test1[!is.na(Test1$CBScore_R3),], method="anova")
+> Test1$CBScore_R3[is.na(Test1$CBScore_R3)] <- predict(CBScore_R3, Test1[is.na(test5$CBScore_R3),])
+
+> # Before running the logistic model make sure all categorical varaible is defined as factor
+
+> fit1 <- glm(formula = DealMake_R3 ~ CBScore_R3+ New_UsedR + Price + RateOrAPR + Term + + AmtFinancd+ DealType_R+ Tier+ DelYr, family = binomial(), data = Test1)
+> 
+> summary(fit1)
+
+> Call:
+gglm(formula = DealMake_R3 ~ CBScore_R3 + New_UsedR + Price + 
+    RateOrAPR + Term_R + DelYr, family = binomial(), data = Test1)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-3.2804   0.0645   0.0766   0.0982   1.4013  
+
+Coefficients:
+                 Estimate    Std. Error z value     Pr(>|z|)    
+(Intercept)  7.9870407699 75.0545530197   0.106       0.9153    
+CBScore_R3  -0.0001742024  0.0024312907  -0.072       0.9429    
+New_UsedR1   5.7493231887  1.0456377444   5.498 0.0000000383 ***
+Price        0.0000008086  0.0000164524   0.049       0.9608    
+RateOrAPR   -0.0291519819  0.0311526830  -0.936       0.3494    
+Term_R       0.0111027471  0.0056928858   1.950       0.0511 .  
+DelYr       -0.0041141049  0.0374542048  -0.110       0.9125    
+---
+
+Coefficients:
+                Estimate   Std. Error z value     Pr(>|z|)    
+(Intercept) -3.399282931 77.372253425  -0.044        0.965    
+CBScore_R3  -0.000172229  0.002433291  -0.071        0.944    
+New_UsedR1   5.718479043  1.049532726   5.449 0.0000000508 ***
+Price       -0.000009103  0.000023298  -0.391        0.696    
+RateOrAPR   -0.028380345  0.031182650  -0.910        0.363    
+Term_R       0.006589400  0.009468521   0.696        0.486    
+AmtFinancd   0.000016054  0.000026891   0.597        0.551    
+DelYr        0.001619489  0.038632182   0.042        0.967    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 642.26  on 577  degrees of freedom
+Residual deviance: 360.12  on 567  degrees of freedom
+AIC: 382.12
+
+Number of Fisher Scoring iterations: 13
+> library(car)
+> vif(fit1)
+                GVIF Df GVIF^(1/(2*Df))
+CBScore_R3  4.508869  1        2.123410
+New_UsedR   1.663567  1        1.289793
+Price       3.128380  1        1.768723
+RateOrAPR   5.757086  1        2.399393
+Term       10.168635  1        3.188830
+AmtFinancd  5.629446  1        2.372645
+DealType_R 12.790607  1        3.576396
+Tier        3.882623  2        1.403723
+DelYr       1.488624  1        1.220092
+
+
+> library(pscl)
+> pR2(fit2)
+   llh      llhNull           G2     McFadden         r2ML         r2CU 
+-183.8497937 -321.1277453  274.5559032    0.4274870    0.3781213    0.5636653 
+# Use Scipon to stop the scientic notation
+options(scipen = 999)
+
+> # Checking the Model Accuracey splitting it into training and testing dataset based on DealMake_R3
+
+
+> train <- createDataPartition(Test1$DealMake_R3, p=0.7, list=FALSE)
+> training<-Test1[Train,]
+> testing <- Test1[-train,]
+> fit22 <- glm(formula = DealMake_R3 ~ CBScore_R3+ New_UsedR + Price + RateOrAPR + Term_R + + AmtFinancd + DelYr, family = binomial(), data = training)
+> summary(fit22)
+>Call:
+glm(formula = DealMake_R3 ~ CBScore_R3 + New_UsedR + Price + 
+    RateOrAPR + Term_R + +AmtFinancd + DelYr, family = binomial(), 
+    data = training)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-3.2489   0.0723   0.0903   0.1167   1.4637  
+
+Coefficients:
+                Estimate   Std. Error z value    Pr(>|z|)    
+(Intercept) 30.441599052 94.736257886   0.321       0.748    
+CBScore_R3   0.000043005  0.002796497   0.015       0.988    
+New_UsedR1   5.563128786  1.074472555   5.178 0.000000225 ***
+Price        0.000003190  0.000029062   0.110       0.913    
+RateOrAPR   -0.018940138  0.036800054  -0.515       0.607    
+Term_R       0.009898565  0.011603552   0.853       0.394    
+AmtFinancd   0.000003238  0.000033530   0.097       0.923    
+DelYr       -0.015457733  0.047334765  -0.327       0.744    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 450.48  on 404  degrees of freedom
+Residual deviance: 257.73  on 397  degrees of freedom
+AIC: 273.73
+
+Number of Fisher Scoring iterations: 8
+
+> fitted.result <- predict(fit22,newdata=testing, type='response')
+> DealMake_R3_testing <- testing$DealMake_R3
+> model_pred_dir <- ifelse(fitted.result > 0.5, 1,0)
+> table(model_pred_dir, DealMake_R3_testing)
+              DealMake_R3_testing
+model_pred_dir   0   1
+             0  35  30
+             1   7 101
+> Accuracy<- 1- (mean(model_pred_dir != DealMake_R3_testing))
+> Accuracy
+[1] 0.7861272
+
+> # Clearly model has a poor accuracy of 78% which is something to think about if this is implemented in NCCDi
+
+> # Replicating the analysis for the preferred Zip
+
+> Test2 <- read.csv("test9-PreferredZipCodes.csv", sep=",")
+> Test2 < as.data.frame(Test2)
+> Test2$CBScore_R1 <- Test2$CBScore_R
+> library(rpart)
+> CBScore_R1 <- rpart( CBScore_R1~ Price + RateOrAPR + AmtFinancd + CashDown, data=Test1[!is.na(Test2$CBScore_R1),], method="anova")
+
+> # Let's make sure that the categorical variables are defined as factors
+> Test2$DealMake_R3 <- as.factor(Test2$DealMake_R3)
+> Test2$DealType_R <- as.factor(Test2$DealType_R)
+> Test2$New_UsedR <- as.factor(Test2$New_UsedR)
+> Test2$DelYr_R <- Test2$DelYr
+> Test2$DelYr_R <- as.factor(Test2$DelYr_R)
+
+> # Unfortunately, binomial logistic did not converge for the preferred location so I analyzed using multinomial regression
+
+
+> library(nnet)
+> fit4 <- multinom(formula = DealMake_R4 ~ CBScore_R3+ New_UsedR + Price + RateOrAPR + Term_R + DelYr data = Test1)
+> summary(fit4)
+> library(car)
+> Anova(fit4)
+
+
+ fit4 <- multinom(formula = DealMake_R4 ~ CBScore_R1+ New_UsedR + Price + RateOrAPR + Term + DelYr, data = Test2)
+
+# Data for All Zip excluding the preferred ones
+> fit24 <- glm(formula = DealMake_R3 ~ CBScore_R2+ New_UsedR + Price + RateOrAPR + Term + AmtFinancd,family = binomial(), data = Test3)
+> vif(fit24)
+
+> fit24 <- glm(formula = DealMake_R3 ~ CBScore_R2+ New_UsedR + Price + RateOrAPR + Term + AmtFinancd,family = binomial(), data = Test3)
+> vif(fit24)
+CBScore_R2  New_UsedR      Price  RateOrAPR       Term AmtFinancd 
+  4.068394   1.074937   2.494406   4.660258   3.631043   4.944274 
+> summary(fit24)
+
+Call:
+glm(formula = DealMake_R3 ~ CBScore_R2 + New_UsedR + Price + 
+    RateOrAPR + Term + AmtFinancd, family = binomial(), data = Test3)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-3.4090   0.0561   0.0793   0.1192   1.4894  
+
+Coefficients:
+                Estimate   Std. Error z value  Pr(>|z|)    
+(Intercept)  0.968404158  1.987905578   0.487     0.626    
+CBScore_R2  -0.001713706  0.002610173  -0.657     0.511    
+New_UsedR1   5.449190114  1.047991995   5.200 0.0000002 ***
+Price       -0.000005241  0.000022042  -0.238     0.812    
+RateOrAPR   -0.051663837  0.032382322  -1.595     0.111    
+Term         0.008902556  0.009443697   0.943     0.346    
+AmtFinancd   0.000014819  0.000027328   0.542     0.588    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 569.15  on 511  degrees of freedom
+Residual deviance: 334.77  on 505  degrees of freedom
+AIC: 348.77
+
+Number of Fisher Scoring iterations: 8
+
+# Applying LDA to DealMake in terms of Credit and Price, Term
+> newtest <- DataFr1[,c(15,26,45)]
+> Auto.lda <- lda(DealMake_R4 ~ ., data=newtest)
+> Auto.lda
+Call:
+lda(DealMake_R4 ~ ., data = newtest)
+
+Output: 
+Prior probabilities of groups:
+         1          2          3          5 
+0.73770492 0.03278689 0.03278689 0.19672131 
+
+Group means:
+     Price CBScore_R1
+1 29937.47   751.2889
+2  6881.50   676.0000
+3  7408.00   640.5000
+5 20429.00   657.1917
+
+Coefficients of linear discriminants:
+                     LD1           LD2
+Price      -5.534821e-05  5.574184e-05
+CBScore_R1 -5.021793e-03 -8.837411e-03
+
+Proportion of trace:
+   LD1    LD2 
+0.9023 0.0977 
+
+# Run some Decision Tree and Random Forest with the data
+> library(rpart)
+> mytree <- rpart(DealMake_R3 ~ CBScore_R1+ Term+AmtFinancd+ Price+ CashDown,, data = TestMc1, method = "class")
+> library(RColorBrewer)
+> fancyRpartPlot(mytree)
+
+> install.packages("rattle")
+> library(rattle)
+> install.packages("rpart.plot")
+> install.packages('randomForest')
+> library(randomForest)
+> set.seed(415)
+> mytree1 <- randomForest(DealMake_R3 ~ CBScore_R1+ Term+AmtFinancd+ Price+ CashDown, data = TestMc1, importance=TRUE, ntree=2000)
+> varImpPlot(mytree1)

@@ -1,0 +1,68 @@
+> library(MASS)
+> data(Boston)
+> View(Boston)
+> DataFrame <- Boston
+> help("Boston")
+> str(DataFrame)
+> hist(DataFrame$medv)
+> dim(DataFrame)
+> head(DataFrame, 3)
+> apply(DataFrame, 2,range)
+> maxValue <- apply(DataFrame, 2, max)
+> minValue <- apply(DataFrame, 2, min)
+> DataFrame <- as.data.frame(scale(DataFrame, center=minValue,scale=maxValue-minValue))
+
+> library(h2o)
+> h2o.init(ip="localhost", port=54321, max_mem_size="2650m")
+> # You will see the output like this
+
+># H2O is not running yet, starting it now...
+
+>#Note:  In case of errors look at the following log files:
+#    C:\Users\DANSAR~1\AppData\Local\Temp\RtmpAh6Hx4/h2o_Dan_Sarkar_started_from_r.out
+#   C:\Users\DANSAR~1\AppData\Local\Temp\RtmpAh6Hx4/h2o_Dan_Sarkar_started_from_r.err
+#java version "1.8.0_101"
+#Java(TM) SE Runtime Environment (build 1.8.0_101-b13)
+# Java HotSpot(TM) 64-Bit Server VM (build 25.101-b13, mixed mode)
+#Starting H2O JVM and connecting: .. Connection successful!
+# R is connected to the H2O cluster: 
+#    H2O cluster uptime:         5 seconds 6 milliseconds 
+#    H2O cluster version:        3.10.5.3 
+#    H2O cluster version age:    2 months and 25 days  
+#    H2O cluster name:           H2O_started_from_R_Dan_Sarkar_ylr518 
+#    H2O cluster total nodes:    1 
+#    H2O cluster total memory:   2.30 GB 
+#    H2O cluster total cores:    4 
+#    H2O cluster allowed cores:  4 
+#    H2O cluster healthy:        TRUE 
+#    H2O Connection ip:          localhost 
+#    H2O Connection port:        54321 
+#    H2O Connection proxy:       NA 
+#    H2O Internal Security:      FALSE 
+#    R Version:                  R version 3.3.1 (2016-06-21) 
+
+># Settng up the model for h2o
+> y <- "medv"
+># x will be all column except y
+> x <- setdiff(colnames(DataFrame),y)
+> # Develop training and test dataset using h20. You can use caret also for this
+> ind <- sample(1:nrow(DataFrame),400)
+> trainDF <- DataFrame[ind,]
+> testDF <- DataFrame[-ind,]
+> # Read about h2o Deep Learning
+> ?h2o.deeplearning
+> # Set the model in the training dataset
+model1 <- h2o.deeplearning(x=x, y=y, seed=1234, training_frame= as.h2o(trainDF), nfolds=3, stopping_rounds=7, epochs=400, overwrite_with_best_model=TRUE, activation= "Tanh", input_dropout_ratio= 0.1, hidden= c(10,10), l1=6e-4, loss="Automatic", distribution="AUTO", stopping_metric="MSE")
+> # Test the performance in the test dataset
+prediction <- as.data.frame(predict(model1,as.h2o(testDF)))
+
+> # You can calculate the the MSE by hand
+sum((prediction$predict-testDf$medv)^2)/nrow(testDf)
+
+> # Plot the actual vs predicted
+plot(testDf$medv,prediction$predict,col='blue', main='Real vs Predicted', pch=1, cex=0.9, type="p", xlab="Actual", ylab="Predicted")
+abline(0,1,col="black")
+
+h2o.shutdown(prompt=FALSE)
+
+Link: https://www.youtube.com/watch?v=uALv0VkPI30

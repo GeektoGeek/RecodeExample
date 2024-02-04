@@ -1,0 +1,62 @@
+> Data$anglers_4R <- Data$anglers_4
+> View(Data)
+> View(Data)
+> Data$anglers_4R <- as.factor(Data$anglers_4R)
+> str(Data$art_craft)
+# logi [1:6036] NA TRUE TRUE NA TRUE TRUE ...
+> sum(is.na(Data$art_craft))
+# [1] 2868
+> Data$art_craft <- as.integer(Data$art_craft == "TRUE")
+># Removing a specific column from the dataset
+> Data <- subset(Data, select = -art_craftR)
+># Showing the entire list of variables
+> str(Data, list.len = 408)
+> Data$auto_motorcycle_racing_R <- Data$auto_motorcycle_racing
+> sum(is.na(Data$auto_motorcycle_racing))
+> Data <- subset(Data, select = -aerobics_R)
+> Data$aerobics_R <- Data$aerobics
+> Data$aerobics_R <- as.integer(Data$aerobics_R == "TRUE")
+> summary(Data$aerobics_R)
+> Data$auto_parts_repair_accesories_work_R <- as.integer(Data$auto_parts_repair_accesories_work=="TRUE")
+> summary(Data$auto_parts_repair_accesories_work_R)
+> finalData<-subset(Data,!(is.na(Data["Credit_Ranges"]) | is.na(Data["census_tract"])| is.na(Data["income"])| is.na(Data["credit_card"])))
+# Changing a logical to an integer
+> Data$cars_R1 <- as.integer(Data$cars=="TRUE")
+ fit <- multinom(formula = Tier_R ~ age+ auto_work+auto_motorcycle_racing_R+anglers_4+education_code+gender+home_owner +Credit_Ranges+curr_home_value + income+home_price+inferred_household_rank+Investment_type+len_of_residence+num_credit_lines+travel, data = Data)
+> Anova(fit)
+
+
+> Age_Incomelt_25 <- sqldf("select count(income), income, age from Data where age < 25 group by income,age")
+> View(Age_Incomelt_25)
+> View(Age_Incomelt_25)
+> write.csv(Age_Incomelt_25[,1:3], "Age_Incomelt_25.csv", row.names = FALSE)
+> Age_Income25_34 <- sqldf("select count(income), income, age from Data where (age>=25 and age < 35) group by income,age")
+> write.csv(Age_Income25_34[,1:3], "Age_Income25_34.csv", row.names = FALSE)
+> Age_Income35_44 <- sqldf("select count(income), income, age from Data where (age>=35 and age < 45) group by income,age")
+> write.csv(Age_Income35_44[,1:3], "Age_Income35_44.csv", row.names = FALSE)
+> Age_Income45_54 <- sqldf("select count(income), income, age from Data where (age>=45 and age < 55) group by income,age")
+> write.csv(Age_Income45_54[,1:3], "Age_Income45_54.csv", row.names = FALSE)
+> Age_Income55_64 <- sqldf("select count(income), income, age from Data where (age>=55 and age < 65) group by income,age")
+> write.csv(Age_Income55_64[,1:3], "Age_Income55_64.csv", row.names = FALSE)
+> Age_Income65_74 <- sqldf("select count(income), income, age from Data where (age>=65 and age < 75) group by income,age")
+
+> Age_Incomegt_75 <- sqldf("select count(income), income, age from Data where (age>=75 and age <100) group by income,age")
+> write.csv(Age_Incomegt_75[,1:3], "Age_Incomegt_75.csv", row.names = FALSE)
+> Age_Incomelt_25_make <- sqldf("select count(make_src), make_src, model_src, income, age from Data where age < 25 group by income,age")
+> View(Age_Incomelt_25_make)
+> View(Age_Incomelt_25_make)
+> View(Age_Incomelt_25_make)
+> write.csv(Age_Incomelt_25_make[,1:5], "Age_Incomelt_25_make.csv", row.names = FALSE)
+> Age_Incomelt_25_make <- sqldf("select count(make_src), make_src, model_src, income, age from Data where age < 25 group by make_src")
+> Age_Incomelt_25_make <- sqldf("select count(make_src), make_src, model_src, income, age from Data where age < 25 group by income,age")
+> Age_Incomelt_25_make1 <- sqldf("select count(make_src), make_src, model_src, income, age from Data where age < 25 group by make_src")
+> write.csv(Age_Incomelt_25_make1[,1:5], "Age_Incomelt_25_make1.csv", row.names = FALSE)
+> Age_Income35_54 <- sqldf("select count(make_src),make_src, model_src,income, age from Data where (age>=35 and age < 55) group by make_src")
+> Age_Income35_54_make <- sqldf("select count(make_src),make_src, model_src,income, age from Data where (age>=35 and age < 55) group by make_src")
+> write.csv(Age_Income35_54_make[,1:5], "Age_Income35_54_make.csv", row.names = FALSE)
+> Age_Income55_64_make <- sqldf("select count(make_src),make_src, model_src,income, age from Data where (age>=55 and age < 65) group by make_src")
+> write.csv(Age_Income55_64_make[,1:5], "Age_Income55_64_make.csv", row.names = FALSE)
+> Age_Income65_make <- sqldf("select count(make_src),make_src,model_src,income,age from Data where (age>=65 and age <100) group by make_src")
+> write.csv(Age_Income65_make[,1:5], "Age_Income65_make.csv", row.names = FALSE)
+> Age_Incomelt_25_model <- sqldf("select count(make_src), make_src, model_src, income, age from Data where age < 25 group by model_src")
+> write.csv(Age_Incomelt_25_model[,1:5], "Age_Incomelt_25_model.csv", row.names = FALSE)

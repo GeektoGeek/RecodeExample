@@ -1,0 +1,154 @@
+﻿> setwd("~/NCC_Pricing")
+> Data <- read.csv("RawData.csv", sep=",")
+> View(Data)
+> DataFr<- as.data.frame(Data)
+> summary(DataFr)
+> library(data.table)
+> View(dt)
+> write.csv(dt[,1:3], "dt.csv", row.names = FALSE)
+> library(sqldf)
+> install.packages("sqldf")
+> existing_cust<- sqldf("select * from Data where segmentation='Existing'")
+> valid_concession_cust<- sqldf("select * from existing_cust where is_validated_concession=1")
+> valid_concession_cust<- sqldf("select * from existing_cust where is_validated_concession=1 group by increase_price")
+> plot(existing_cust$pre.inc.vol, existing_cust$post.inc.vol)
+> hist(existing_cust$pre.inc.vol)
+> hist(existing_cust$post.inc.vol)
+> aov.ex1 = aov(is_concession~increase_price,data=existing_cust)
+> summary(aov.ex1)
+> fit <- glm(is_concession~increase_price,data=existing_cust,family=binomial())
+> fit_existing_Cust <- glm(is_concession~increase_price,data=Data,family=binomial())
+> summary(fit_existing_Cust)
+
+Call:
+glm(formula = is_concession ~ increase_price, family = binomial(), 
+    data = Data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-3.5440  -0.4836  -0.4813  -0.4805   2.1058  
+
+Coefficients:
+                 Estimate Std. Error z value Pr(>|z|)    
+(Intercept)    -2.1018247  0.0134695  -156.0   <2e-16 ***
+increase_price  0.0018458  0.0001146    16.1   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 41257  on 58213  degrees of freedom
+Residual deviance: 40901  on 58212  degrees of freedom
+AIC: 40905
+
+Number of Fisher Scoring iterations: 4
+exist_cust_CrRpt <- sqldf("select * from existing_cust where item='ExCrRpt'OR item='TUCrRpt'OR item='EQCrRpt'")
+> View(exist_cust_CrRpt)
+> fit1 <- glm(is_concession~increase_price,data=exist_cust_CrRpt,family=binomial())
+> summary(fit1)
+
+Call:
+glm(formula = is_concession ~ increase_price, family = binomial(), 
+    data = exist_cust_CrRpt)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-0.4803  -0.4289  -0.3975  -0.3474   2.6452  
+
+Coefficients:
+               Estimate Std. Error z value Pr(>|z|)    
+(Intercept)    -1.60533    0.14003 -11.464  < 2e-16 ***
+increase_price -0.29376    0.04556  -6.447 1.14e-10 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 6065.4  on 11315  degrees of freedom
+Residual deviance: 6020.5  on 11314  degrees of freedom
+AIC: 6024.5
+
+Number of Fisher Scoring iterations: 5
+> exist_cust_anci <- sqldf("select * from existing_cust where item='Onsite'OR item='ExFraudInq'OR item='R1IDVM'OR item='EXEZApp'OR item='EXEZAS'OR item='TUHawk'OR item='TUEZApp'OR item='EXSubSer'OR item='TUFCRAComp'OR item='EXFCRAComp'OR item='EXFraudHit'OR item='EXEZTVP'OR item='TUFicoAuto04'OR item='EXEZCVP'OR item='RBRecFee'OR item='EQRBP'OR item='EQCrRpt'OR item='EXFicoAuto3'OR item='EQFicoA5F'OR item='TUHawkHit'OR item='CM6.3'OR item='TUFicoAuto08'OR item='TUSubSer'OR item='AALtr'OR item='ExOFAC'OR item='TUCrRpt'OR item='POI'")
+> install.packages("pscl")
+> # is_concession=1 
+> # In our example here, the odds ratio is 0.990. Because s1gcseptsnew is a continuous variable, we can say that with every point increase in GCSE score, the odds of not being enrolled in full time education after secondary school are multiplied by 0.990. Because 0.990 is less than 1, any odds being multiplied by 0.990 will decrease. 
+> # With every point increase in price, the odds of not being roll-backs for NCC clients after price increase are multiplied by 0.745. Because 0.745 is less than 1, any odds being multiplied by 0.745 will decrease. 
+
+
+> fit2 <- glm(is_concession~increase_price,data=exist_cust_anci,family=binomial())
+> summary(fit2)
+
+Call:
+glm(formula = is_concession ~ increase_price, family = binomial(), 
+    data = exist_cust_anci)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-0.3225  -0.3223  -0.3218  -0.3201   2.6438  
+
+Coefficients:
+                 Estimate Std. Error  z value Pr(>|z|)    
+(Intercept)    -2.9299577  0.0282319 -103.782   <2e-16 ***
+increase_price -0.0016021  0.0008371   -1.914   0.0556 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 11222  on 28279  degrees of freedom
+Residual deviance: 11218  on 28278  degrees of freedom
+AIC: 11222
+
+Number of Fisher Scoring iterations: 5
+> install.packages("pscl")
+> library(pscl)
+> pR2(fit1)
+          llh       llhNull            G2      McFadden          r2ML          r2CU 
+-3.010264e+03 -3.032713e+03  4.489784e+01  7.402258e-03  3.959782e-03  9.543514e-03 
+> pR2(fit2)
+       llh       llhNull            G2      McFadden          r2ML          r2CU 
+-5.608995e+03 -5.611066e+03  4.141730e+00  3.690680e-04  1.464436e-04  4.470928e-04 
+> summary(existing_cust)
+> install.packages("data.table")
+> library(data.table)
+> dt1<-data.table(summary(existing_cust))
+> write.csv(dt1[,1:3], "dt1.csv", row.names = FALSE)
+> exist_cust_itembreak<- sqldf("select count(item), item from existing_cust group by item")
+> write.csv(exist_cust_itembreak[,1:2], "exist_cust_itembreak.csv", row.names = FALSE)
+> install.packages("MASS")
+> library(MASS)
+> wilcox.test(existing_cust$pre.inc.vol, existing_cust$post.inc.vol, paired=FALSE) 
+> 	Wilcoxon rank sum test with continuity correction
+
+data:  existing_cust$pre.inc.vol and existing_cust$post.inc.vol
+W = 1326200000, p-value < 2.2e-16
+alternative hypothesis: true location shift is not equal to 0
+
+
+# Changing the Regression based on Price Percentage
+# First we look into the Percent Increase in price for Credit Reports
+> Sample1<- sqldf("select * from exist_cust_CrRpt where increse_pct >0")
+> dat<- as.data.frame(Sample1)
+> fit1 <- glm(is_concession~increase_pct,data=dat,family=binomial())
+> summary(fit1)
+> plot(is_concession~increase_pct,data=dat,xlab="Increase Pct",ylab="Probability of Rollback")
+> curve(predict(fit2,data.frame(increase_pct=x),type="resp"),add=TRUE)
+
+# Changing the Regression based on Price Percentage for Ancillaries
+
+> Sample2<- sqldf("select * from exist_cust_anci where increse_pct >0")
+> dat1<- as.data.frame(Sample2)
+> fit2 <- glm(is_concession~increase_pct,data=dat1,family=binomial())
+> summary(fit2)
+> plot(is_concession~increase_pct,data=dat1,xlab="Increase Pct",ylab="Probability of Rollback")
+> curve(predict(fit2,data.frame(increase_pct=x),type="resp"),add=TRUE)
+
+> library(popbio)
+> points(dat$increase_pct,fitted(fit2),pch=20)
+> library(popbio)
+> logi.hist.plot(dat$increase_pct,dat$is_concession,boxp=FALSE,type="hist",col="gray")
+
+
+
+

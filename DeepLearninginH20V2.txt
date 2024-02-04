@@ -1,0 +1,120 @@
+> install.packages("MASS")
+> install.packages("h2o")
+> library(MASS)
+> library(h2o)
+# H2O is a fast and scalable opensource Machine Learning platform
+# Several algorthms are available in H2O
+# Setting the seed so that we get the same results each time we run the neural net
+# set.seed(123)
+> DataFrame <- Boston
+> help("Boston")
+> # medv median value of owner-occupied homes in \$1000s.
+> hist(DataFrame$medv)
+> dim(DataFrame)
+[1] 506  14
+> head(DataFrame, 3)
+     crim zn indus chas   nox    rm  age    dis rad tax
+1 0.00632 18  2.31    0 0.538 6.575 65.2 4.0900   1 296
+2 0.02731  0  7.07    0 0.469 6.421 78.9 4.9671   2 242
+3 0.02729  0  7.07    0 0.469 7.185 61.1 4.9671   2 242
+  ptratio  black lstat medv
+1    15.3 396.90  4.98 24.0
+2    17.8 396.90  9.14 21.6
+3    17.8 392.83  4.03 34.7
+## Check the summary of each variable
+## This will give min and max value for each of the variable
+> apply(DataFrame, 2, range)
+         crim  zn indus chas   nox    rm   age     dis rad
+[1,]  0.00632   0  0.46    0 0.385 3.561   2.9  1.1296   1
+[2,] 88.97620 100 27.74    1 0.871 8.780 100.0 12.1265  24
+     tax ptratio  black lstat medv
+[1,] 187    12.6   0.32  1.73    5
+[2,] 711    22.0 396.90 37.97   50
+### Seems like scale of each variable is not same
+### Normalization is necessary so that each variable is scale properly
+### And none of the variables overdominates
+### scale function will give mean=0 and standard deviation=1 for each variable
+> maxValue<- apply(DataFrame, 2, max)
+> minValue<- apply(DataFrame, 2, min)
+> DataFrame <- as.data.frame(scale(DataFrame, center=minValue,scale=maxValue-minValue))
+
+## H2O Initialization
+##h2o.init(ip="localhost", port=54321, max_mem_size="2650m")
+
+> h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+
+H2O is not running yet, starting it now...
+
+Note:  In case of errors look at the following log files:
+    C:\Users\dsarkar\AppData\Local\Temp\Rtmpcv1h8C/h2o_dsarkar_started_from_r.out
+    C:\Users\dsarkar\AppData\Local\Temp\Rtmpcv1h8C/h2o_dsarkar_started_from_r.err
+
+java version "1.8.0_101"
+Java(TM) SE Runtime Environment (build 1.8.0_101-b13)
+Java HotSpot(TM) Client VM (build 25.101-b13, mixed mode)
+
+Starting H2O JVM and connecting: . Connection successful!
+
+R is connected to the H2O cluster: 
+    H2O cluster uptime:         5 seconds 804 milliseconds 
+    H2O cluster version:        3.14.0.3 
+    H2O cluster version age:    1 month and 27 days  
+    H2O cluster name:           H2O_started_from_R_dsarkar_iyx669 
+    H2O cluster total nodes:    1 
+    H2O cluster total memory:   1.17 GB 
+    H2O cluster total cores:    8 
+    H2O cluster allowed cores:  8 
+    H2O cluster healthy:        TRUE 
+    H2O Connection ip:          localhost 
+    H2O Connection port:        54321 
+    H2O Connection proxy:       NA 
+    H2O Internal Security:      FALSE 
+    H2O API Extensions:         Algos, AutoML, Core V3, Core V4 
+    R Version:                  R version 3.4.2 (2017-09-28) 
+
+Warning message:
+In .h2o.startJar(ip = ip, port = port, nthreads = nthreads, max_memory = max_mem_size,  :
+  You have a 32-bit version of Java. H2O works best with 64-bit Java.
+Please download the latest Java SE JDK 7 from the following URL:
+http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
+
+## Defining x and y
+
+# Settng up the model for h2o
+y <- "medv"
+# x will be all column except y
+x <- setdiff(colnames(DataFrame),y)
+> # Develop training and test dataset using h20. You can use caret also for this
+> ind <- sample(1:nrow(DataFrame),400)
+> trainDF <- DataFrame[ind,]
+> testDF <- DataFrame[-ind,]
+> ?h2o.deeplearning
+
+## x=vector containing charecter names of the prediction in the model
+## y=name of the response variable in the model
+## activation=Tanh, TanhWithDropout, Rectifier, RectifierWithDropout, Maxout,etc
+## input_dropout_ration=fraction of features for each training row to be omitted in training(To do sampling)
+## L1, L2= regularization
+# L1=makes weights 0
+# L2= makes weights nearly zero not exactly zero
+# loss= "Automatic", "CrossEntropy" (for classification only),
+## "Quadratic", "Absolute" (experimental),or "Huber"
+## distribution=bernoulli,gaussian,multinomial, poisson,gamma, etc.
+## stopping metric="Auto", AUC,r2,LagLoss, etc
+### stopping tolerance metric-based stopping criterion
+### nfolds= no. of folds for crossvalidation
+
+# Set the model in the training dataset
+
+model1 <- h2o.deeplearning(x=x, y=y, seed=1234, training_frame= as.h2o(trainDF), nfolds=3, stopping_rounds=7, epochs=400, overwrite_with_best_model=TRUE, activation= "Tanh", input_dropout_ratio= 0.1, hidden= c(10,10), l1=6e-4, loss="Automatic", distribution="AUTO", stopping_metric="MSE")
+# Test the performance in the test dataset
+prediction <- as.data.frame(predict(model1,as.h2o(testDF)))
+
+# You can calculate the the MSE by hand
+sum((prediction$predict-testDF$medv)^2)/nrow(testDF)
+
+# Plot the actual vs predicted
+plot(testDF$medv,prediction$predict,col='blue', main='Real vs Predicted', pch=1, cex=0.9, type="p", xlab="Actual", ylab="Predicted")
+abline(0,1,col="black")
+
+h2o.shutdown(prompt=FALSE)

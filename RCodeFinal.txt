@@ -1,0 +1,315 @@
+setwd("~/Amitree")
+library(data.table)
+library(zoo)
+Data <- fread("the_event_data.csv", sep = ",", header = TRUE)
+str(Data)
+library(lubridate)
+
+library(sqldf)
+## See all the events in the datasets
+sqldf("select count((event_type)), event_type from Data group by event_type")
+
+### count((event_type))                  event_type
+### 1               31601              AccountCreated
+### 2               11268              AccountDeleted
+### 3               59536    PhotoNameManuallyCreated
+### 4              981051          PhotoNameSuggested
+### 5              141677 PhotoNameSuggestionAccepted
+
+Data$timestamp1<- Data$timestamp
+
+### This just creates the date without hr,mn,sec
+Data$timestamp1 <- as.Date.POSIXlt(timestamp1)
+
+Data$timestamp2<- Data$timestamp
+Data$timestamp2 <- ymd_hms(Data$timestamp2,tz=Sys.timezone())
+
+Data1<- subset(Data, select=c(1,2,3,6))
+str(Data1)
+
+### Data2<- sqldf("select event_id, user_id, event_type, timestamp2 as timestamp2_AccCreated, timestamp2 as timestamp2_AccDeleted, timestamp2 as timestamp2_PhoManCreated,timestamp2 as timestamp2_PhotoNmSugg, timestamp2 as timestamp2_PhoNmSuggAccepted from Data1 group by event_type")
+### View(Data2)
+### str(Data2)
+
+### Extract the timestamps from all the events
+
+Data3<- sqldf("select event_id, user_id, event_type, timestamp2 as timestamp2_AccCreated from Data1 where event_type='AccountCreated'")
+Data4<- sqldf("select event_id, user_id, event_type, timestamp2 as timestamp2_AccDeleted from Data1 where event_type='AccountDeleted'")
+Data5<- sqldf("select event_id, user_id, event_type, timestamp2 as timestamp2_PhNmMaCrt from Data1 where event_type='PhotoNameManuallyCreated'")
+Data6<- sqldf("select event_id, user_id, event_type, timestamp2 as timestamp2_PhNmSugg from Data1 where event_type='PhotoNameSuggested'")
+Data7<- sqldf("select event_id, user_id, event_type, timestamp2 as timestamp2_PhNmSugAcc from Data1 where event_type='PhotoNameSuggestionAccepted'")
+ 
+Data3$timestamp2_AccCreated<-.POSIXct(as.character(Data3$timestamp2_AccCreated, format="%Y-%m-%d %H:%M:%S.%OS"))
+View(Data3)
+
+Data4$timestamp2_AccDeleted<-.POSIXct(as.character(Data4$timestamp2_AccDeleted, format="%Y-%m-%d %H:%M:%S.%OS"))
+View(Data4)
+
+Data5$timestamp2_PhNmMaCrt<-.POSIXct(as.character(Data5$timestamp2_PhNmMaCrt, format="%Y-%m-%d %H:%M:%S.%OS"))
+Data6$timestamp2_PhNmSugg<-.POSIXct(as.character(Data6$timestamp2_PhNmSugg, format="%Y-%m-%d %H:%M:%S.%OS"))
+
+Data7$timestamp2_PhNmSugAcc<-.POSIXct(as.character(Data7$timestamp2_PhNmSugAcc, format="%Y-%m-%d %H:%M:%S.%OS"))
+View(Data7)
+
+### The visualization on top reflects the proportion of users who are active in their first week 
+### on the product, with the date on the x-axis. A user is considered ‘active’ if they have named 
+### a photograph, either by doing so manually or accepting a suggestion.
+
+### This seems to be event type 3 & 5
+
+### Do some validations
+
+### Total No of users
+userid_Count<- sqldf("select count(distinct(user_id)), user_id from Data group by user_id")
+
+### Total number of distinct users are 76946
+
+### Total No of events
+eventid_Count<- sqldf("select count(distinct(event_id)), event_id from Data group by event_id")
+
+### Total number of distinct event are 1225133
+
+### Total number of events and users
+
+userVsevent<- sqldf("select count(distinct(event_id)), user_id from Data group by user_id")
+
+### Build the data 
+
+## Sug_Acc<- sqldf("select a.event_id_evphotoNameSugAcc, a.user_id, a.event_type as event_photoNameSugAcc, a. timestamp2_PhNmSugAcc, b.event_id, b.event_type as event_photoNmMnCr, b.timestamp2_PhNmMaCrt from Data7 a left join Data5 b on a.user_id=b.user_id")
+
+Sug_Acc<- sqldf("select a. event_id as event_id_evphotoNameSugAcc, a.user_id, a.event_type as event_photoNameSugAcc, a. timestamp2_PhNmSugAcc, b.event_id as event_id_photoNmMnCr, b.event_type as event_photoNmMnCr, b.timestamp2_PhNmMaCrt from Data7 a 
+left join Data5 b on a.user_id=b.user_id")
+
+View(Sug_Acc)
+
+View(Data3)
+### Join with the Previous table with Data 3
+
+Sug_Acc_ACCreated<- sqldf("select a.*, b.event_type as AccountCreated, b.timestamp2_AccCreated as timestamp2_AccCreated from Sug_Acc a left join Data3 b on a.user_id= b.user_id")
+
+### Table Sug_Acc_ACCreated has some NA for the timestamp2_AccountCreated 
+
+### final<- Sug_Acc_ACCreated[complete.cases(Sug_Acc_ACCreated), ]
+
+final1<- sqldf("select * from Sug_Acc_ACCreated where AccountCreated !='NA' or timestamp2_AccCreated !='NA'")
+
+### Check to see how many accounts were created
+
+test<- sqldf("select timestamp2_AccCreated, user_id from final1 group by user_id")
+
+### This shows only 14000 unique users accounts were created in the timeframe
+
+### Remove the timestamp and extract the date (leave the timestamp) for Account Created, PhotoNameManuallyCreated and PhotoName Suggestion Accepted
+
+ final1$timestamp2_AccCreated1<- final1$timestamp2_AccCreated
+ final1$timestamp2_AccCreated1 <- as.Date(final1$timestamp2_AccCreated1)
+
+ View(final1)
+
+## final2<- sqldf("select * from final1 where timestamp2_AccCreated!='NA' group by user_id")
+
+ final2<- sqldf("select * from final1 where timestamp2_AccCreated!='NA' group by user_id")
+ final2$timestamp2_PhNmSugAcc1 <- as.Date(final2$timestamp2_PhNmSugAcc)
+ final2$timestamp2_PhNmMaCrt1<- as.Date(final2$timestamp2_PhNmMaCrt)
+ diff1 <- as.numeric(difftime(final2$timestamp2_PhNmSugAcc,final2$timestamp2_AccCreated,units="days"))
+ tz1<-as.data.frame(diff1)
+ tz1<- round(tz1, digits=0)
+ 
+ View(tz1)
+ diff2 <- as.numeric(difftime(final2$timestamp2_PhNmMaCrt,final2$timestamp2_AccCreated,units="days"))
+ tz2<-as.data.frame(diff2)
+ tz2<- round(tz2, digits=0)
+ 
+ final2 <- cbind(final2,tz1)
+ final2 <- cbind(final2,tz2)
+
+ DF1<- sqldf("select count(timestamp2_AccCreated) as TotalAccCr, timestamp2_AccCreated1 from final2 group by timestamp2_AccCreated1")
+ View(DF1)
+ View(final2)
+ final2$Wk1ActivePhNmSugAc = ifelse(final2$diff1<= 7,1,0)
+ View(final2)
+ final2$Wk1ActivePhNmMnCr = ifelse(final2$diff2<= 7,1,0)
+ View(final2)
+
+### In this context, NA means we do not have a clear evidence that users manually suggested a name or accepted a name
+final2$Wk1ActivePhNmMnCr[which(is.na(final2$Wk1ActivePhNmMnCr))] <- 0
+
+### here we do not roll it up because we are still building the data
+
+final2 <- sqldf("SELECT *, 
+         CASE 
+           WHEN ((Wk1ActivePhNmSugAc==1)& (Wk1ActivePhNmMnCr==1))  THEN 1
+ 		   WHEN ((Wk1ActivePhNmSugAc==1) & (Wk1ActivePhNmMnCr==0)) THEN 1
+ 		   WHEN ((Wk1ActivePhNmSugAc==0) & (Wk1ActivePhNmMnCr==1)) THEN 1
+ 		   ELSE 0
+            END As 'Active_1st_Week'
+           FROM final2")
+
+DF2<-sqldf("select sum(Active_1st_Week) as Active1stWk, timestamp2_AccCreated1 from final2 group by timestamp2_AccCreated1")
+
+## Validation
+sum(DF2$Active1stWk)
+## 6595
+
+### Write it in a CSV
+
+write.csv(final2[,1:17], "final2.csv", row.names = FALSE)
+
+str(DF1)
+str(DF2)
+
+DF3<-sqldf("select a.TotalAccCr, a.timestamp2_AccCreated1, b.Active1stWk from DF1 a inner join DF2 b on a.timestamp2_AccCreated1= b.timestamp2_AccCreated1")
+DF3$Prop<- (DF3$Active1stWk/DF3$TotalAccCr)*100
+
+### -------------------------------------------------------------------------------------------------------------------------------------------------
+### Visualization #2
+
+ Data6_uidCnt<-sqldf("select count(distinct(user_id)), user_id from Data6 group by user_id")
+ View(Data6_uidCnt)
+ View(Data6)
+
+ ChData6<- sqldf("select a.user_id, b.* from Data1 a left join Data6 b on a.user_id=b.user_id")
+
+ View(ChData6)
+ ### Clearly ChData6 contans PhotoNameSuggested and also No Name Suggested as this is the overlap of the everything
+ View(Data3)
+
+ ### Let's join the Data3 i.e. AccountCreated because without this 1st week Name Suggestion not possible
+ View(Data3)
+ View(ChData6)
+
+ ChDt6_Dt3<- sqldf("select a.*, b.* from ChData6 a inner join Data3 b on a.user_id=b.user_id")
+
+### Keep a copy of the 
+ChDt6Dt3 <- ChDt6_Dt3
+
+ user_cn_ChDt6_Dt3<- sqldf("select count(distinct(user_id)), user_id from ChDt6_Dt3")
+ View(user_cn_ChDt6_Dt3)
+
+### Again it is 31601 becausse it has the account ccreation date which is essential for first week
+### Let's calculate the difference in days
+
+diff5 <- as.numeric(difftime(ChDt6_Dt3$timestamp2_PhNmSugg,ChDt6_Dt3$timestamp2_AccCreated,units="days"))
+tz5<-as.data.frame(diff5)
+tz5<- round(tz5, digits=0)
+
+
+ChDt6_Dt3 <- cbind(ChDt6_Dt3,tz5)
+
+max(ChDt6_Dt3$diff5)
+
+### [1] NA
+
+min(ChDt6_Dt3$diff5)
+### [1] NA
+
+### Clearly diff5 column has 3 range of values between 0-7, greater than 7 and NA 
+### In this case, greater than 7 and NA can be considered no Name surfaced in the week 1
+
+ChDt6_Dt3$Wk1ActivePhNmSugAc = ifelse(ChDt6_Dt3$diff5<= 7,1,0)
+
+ChDt6_Dt3$Wk1NameSurfaced<-ChDt6_Dt3$Wk1ActivePhNmSugAc
+
+ChDt6_Dt3$Wk1NameSurfaced[which(is.na(ChDt6_Dt3$Wk1NameSurfaced))] <- 0
+
+ ### Let's divide the dataset based on week1 Nm Surfaced and Week1 No Nm Surfaced
+ CF1<-sqldf("select * from ChDt6_Dt3 where Wk1NameSurfaced=1 group by user_id")
+
+## CF1: 18639
+
+### Now we need to find all the user_ids which has a account creation date but not in the group of week1 name surfaced
+
+CF3<- sqldf("SELECT user_id, timestamp2_AccCreated, event_type FROM Data3 AS td
+ WHERE (NOT EXISTS
+        (SELECT user_id, timestamp2_AccCreated, event_type
+            FROM CF1 AS d
+            WHERE (user_id = td.user_id)))") 
+ 
+## CF3: 12962
+
+ CF3$timestamp2_AccCreated1<-as.Date(as.character(as.POSIXct(CF3$timestamp2_AccCreated)))
+ View(CF3)
+
+ CF1$timestamp2_AccCreated1<-as.Date(as.character(as.POSIXct(CF1$timestamp2_AccCreated)))
+ View(CF1)
+
+### Roll it up to Date: This is for 1st week Name Surfaced
+CF1Fin<-sqldf("select count(Wk1NameSurfaced) as CNTNmSurWeek1, timestamp2_AccCreated1 from CF1 group by timestamp2_AccCreated1")
+
+### Roll it up to Date: This is for 1st week No Name Surfaced for all users who created an Account
+CF3Fin<-sqldf("select count(event_type) as CNTNoNmSurWeek1, timestamp2_AccCreated1 from CF3 group by timestamp2_AccCreated1")
+
+
+ Data3X<- Data3
+ View(Data3X)
+ Data3X$timestamp2_AccCreated1<- Data3X$timestamp2_AccCreated
+ str(Data3X)
+
+ Data3X$timestamp2_AccCreated1<-as.Date(as.character(as.POSIXct(Data3X$timestamp2_AccCreated)))
+ View(Data3X)
+ DFC4<- sqldf("select count(timestamp2_AccCreated) as TotalAccCr, timestamp2_AccCreated1 from Data3X group by timestamp2_AccCreated1")
+
+View(DCF4)
+## DCF4 is the one which is group by based on users' sign-up over date
+
+Final3<-sqldf("select a.timestamp2_AccCreated1, a.CNTNmSurWeek1, b.CNTNoNmSurWeek1,  c.TotalACCCr as Count1 from CF1Fin a inner join CF3Fin b inner join DFC4 c on a.timestamp2_AccCreated1=b.timestamp2_AccCreated1 and a.timestamp2_AccCreated1=c.timestamp2_AccCreated1")
+
+Final3$CNTNmSurWeek1Prop<- (Final3$CNTNmSurWeek1/Final3$Count1)*100
+Final3$CNTNoNmSurWeek1Prop<- (Final3$CNTNoNmSurWeek1/Final3$Count1)*100
+Final3$MonthDay <- format(Final3$timestamp2_AccCreated1,"%m-%d")
+
+write.csv(Final3[,1:7], "Final3.csv", row.names = FALSE)
+Final4<-Final3
+
+### Stacked Graph
+library(ggplot2)
+library(lubridate)
+theme_set(theme_bw())
+ 
+ df <- Final4[, c("timestamp2_AccCreated1", "CNTNmSurWeek1Prop", "CNTNoNmSurWeek1Prop")]
+
+ # labels and breaks for X axis text
+ brks <- df$timestamp2_AccCreated1
+ lbls <- lubridate::ymd(brks)
+
+ggplot(df, aes(x=timestamp2_AccCreated1)) +  geom_area(aes(y=CNTNmSurWeek1Prop+CNTNoNmSurWeek1Prop, fill="CNTNoNmSurWeek1Prop")) +  geom_area(aes(y=CNTNoNmSurWeek1Prop, fill="CNTNmSurWeek1Prop")) + labs(title="First Week Name Suggestion", 
+subtitle="", caption="First Week Name Suggestion", y="% New User") +  scale_x_date(labels = lbls, breaks = brks) + scale_fill_manual(name="", values = c("CNTNmSurWeek1Prop"="#00ba38", "CNTNoNmSurWeek1Prop"="#f8766d")) +  theme(panel.grid.minor = element_blank())
+
+
+
+library(ggplot2)
+library(lubridate)
+theme_set(theme_bw())
+
+ df <- Final4[, c("timestamp2_AccCreated1", "CNTNmSurWeek1Prop", "CNTNoNmSurWeek1Prop")]
+
+ # labels and breaks for X axis text
+ brks <- df$timestamp2_AccCreated1
+ lbls <- lubridate::ymd(brks)
+
+# plot
+ggplot(df, aes(x=timestamp2_AccCreated1)) + 
+  geom_line(aes(y=CNTNmSurWeek1Prop, col="CNTNmSurWeek1Prop")) + 
+  geom_line(aes(y=CNTNoNmSurWeek1Prop, col="CNTNoNmSurWeek1Prop")) + 
+  labs(title="First Week Activation", 
+       subtitle="", 
+       caption="Source: Economics", y="") + scale_x_date(labels = lbls, breaks = brks) +   scale_color_manual(name="", values = c("CNTNmSurWeek1Prop"="#00ba38", "CNTNoNmSurWeek1Prop"="#f8766d")) +  theme(panel.grid.minor = element_blank()) 
+
+
+### Let's combine DF3 and Final3
+
+Final6<- sqldf("select a.timestamp2_AccCreated1, a.MonthDay,a.CNTNmSurWeek1Prop, a.CNTNoNmSurWeek1Prop, b.Prop from Final3 a inner join DF3 b on a.timestamp2_AccCreated1=b.timestamp2_AccCreated1")
+
+View(Final6)
+
+dff1 <- Final6[, c("timestamp2_AccCreated1", "CNTNmSurWeek1Prop", "CNTNoNmSurWeek1Prop","Prop")]
+
+ggplot(dff1, aes(x=timestamp2_AccCreated1)) + 
+    geom_line(aes(y=CNTNmSurWeek1Prop, col="CNTNmSurWeek1Prop")) + 
+    geom_line(aes(y=CNTNoNmSurWeek1Prop, col="CNTNoNmSurWeek1Prop")) + 
+    geom_line(aes(y=Prop, col="Prop")) +
+    labs(title="First Week Activation", 
+         subtitle="", 
+         caption="Source: Economics", y="") + scale_x_date(labels = lbls, breaks = brks) +   scale_color_manual(name="", values = c("CNTNmSurWeek1Prop"="#00ba38", "CNTNoNmSurWeek1Prop"="#f8766d","Prop"="#FF0000")) +  theme(panel.grid.minor = element_blank()) 
+
+write.csv(Final3[,1:7], "Final3.csv", row.names = FALSE)

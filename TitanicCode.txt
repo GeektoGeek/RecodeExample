@@ -1,0 +1,405 @@
+> # In the original dataset you can check what column is missing in training and test data-set
+> # colnames_check <- colnames(train) %in% colnames(test) 
+> # colnames(train[colnames_check==FALSE])
+
+> setwd("~/Kaggle-Challenge-Titanic")
+> # First Point the Sesssion and associated 'Set Working Directory As' to Kaggle Challenge Titanic 
+> Tdata <- read.csv("train.csv", sep=",")
+> # set the data as data Frame
+> TdataFr <- as.data.frame(Tdata)
+> View(Tdata)
+> View(TdataFr)
+> summary(TdataFr$Sex)
+> summary(TdataFr$Age)
+
+> # Recode values of Sex to categorial
+> Tdata$Sex_R <- Tdata$Sex
+> TdataFr$Sex_R <- TdataFr$Sex
+> library(plyr)
+> TdataFr$Sex_R <- mapvalues(TdataFr$Sex_R,from = c("female","male"), to = c(0,1))
+> # Note all categorical variable should be defined as Factor in R
+
+> summary(TdataFr$Embarked)
+>  Tdata$Embarked_R <- Tdata$Embarked
+>  TdataFr$Embarked_R <- TdataFr$Embarked
+> # note that Embraked Column using Summary
+> summary(TdataFr$Embarked_R)
+> #   1   2   3 
+> #  2 168  77 644 
+> # This shows there are two missing values
+> # We can use imputation with the majoirty of class 3 .e S
+> TdataFr$Embarked_R[TdataFr$Embarked_R==""] <- "S"
+>  TdataFr$Embarked_R <- mapvalues(TdataFr$Embarked_R,from = c("C","Q","S"), to = c(1,2,3))
+> # A valid assumption is that larger families need more time to get together on a sinking ship, and hence have lower probability of surviving. 
+> # Family size is determined by the variables SibSp and Parch, which indicate the number of family members a certain passenger is traveling with. 
+> # When doing feature engineering, you add a new variable family_size, which is the sum of SibSp and Parch plus one (the observation itself), to the test and train set.
+> TdataFr$Fam_Size <- 1+TdataFr$SibSp+ TdataFr$Parch
+
+> # changing the missing values of Age filed with median
+> TdataFr$Age_R <- TdataFr$Age
+> summary(TdataFr$Age_R)
+> # create a new vector test
+> test <- TdataFr$Age_R
+> is.na(test)
+> which(is.na(test))
+> # median value is 28
+> test[which(is.na(test))] <- 28   # all the NA values received the median values
+> TdataFr1$Age_R<-test             # Age_R variable is # Age_R NA values are replaced with median
+
+> # If you want to delete all the rows of Age which are NA's then apply the following trick. You will see the number of observation reduced from 891 to 
+> # str(TdataFr) 
+> # complete.cases(TdataFr)
+> # x <- TdataFr[complete.cases(TdataFr), ] 
+
+> # Alternatve method combining all of this into a single step
+> TdataFr$Age_R[which(is.na(TdataFr$Age_R))] <- 28
+
+> # Alternative method if you want to relaplce the NAs with mean
+> # TdataFr$Age_R[which(is.na(TdataFr$Age_R))] <- mean(TdataFr$Age_R, na.rm= True)
+> # TdataFr$Age_R[which(is.na(TdataFr$Age_R))] <- mean(TdataFr$Age_R)
+
+
+
+> # Let's do some data plot
+> View(TdataFr)
+> plot(TdataFr$Survived, TdataFr$Age_R)
+> hist(TdataFr$Age_R)
+
+> # Run an Anova First before running the logistic model
+> aov.ex1 = aov(Survived~Age_R,data=TdataFr)
+> summary(aov.ex1)
+
+> # Start building the logistic model with Age first
+> fit <- glm(Survived~Age_R,data=TdataFr,family=binomial())
+> fit
+
+> # Add more predictor
+> fit <- glm(Survived~Age_R+ Sex_R,data=TdataFr,family=binomial())
+> fit
+
+> # Buld the model including all predictors
+> fit <- glm(Survived~Age_R+ Sex_R+ Pclass+SibSp+ Parch+ Fare+ Embarked_R,data=TdataFr,family=binomial())
+> summary(fit)
+
+> # Here is the output
+> # Call:
+> #glm(formula = Survived ~ Age_R + Sex_R + Pclass + SibSp + Parch +  Fare + Embarked_R, family = binomial(), data = TdataFr)
+> #Deviance Residuals: 
+> # Min       1Q   Median       3Q      Max  
+> # -2.6389  -0.5884  -0.4198   0.6200   2.4440  
+
+> #Coefficients:
+> #              Estimate Std. Error z value Pr(>|z|)    
+> # (Intercept)  17.539322 610.559090   0.029   0.9771    
+> # Age_R        -0.039330   0.007845  -5.013 5.35e-07 ***
+> # Sex_R1       -2.719922   0.200663 -13.555  < 2e-16 ***
+> # Pclass       -1.098660   0.143543  -7.654 1.95e-14 ***
+> # SibSp        -0.324239   0.108889  -2.978   0.0029 ** 
+> # Parch        -0.088638   0.118505  -0.748   0.4545    
+> # Fare          0.001940   0.002374   0.817   0.4138    
+> # Embarked_R2 -12.292402 610.558906  -0.020   0.9839    
+> # Embarked_R3 -12.355233 610.558958  -0.020   0.9839    
+> # Embarked_R4 -12.703877 610.558890  -0.021   0.9834    
+> # ---
+> # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> # (Dispersion parameter for binomial family taken to be 1)
+
+> #    Null deviance: 1186.66  on 890  degrees of freedom
+> # Residual deviance:  784.93  on 881  degrees of freedom
+> # AIC: 804.93
+> # Number of Fisher Scoring iterations: 13
+
+> # Now we can run an ANOVA on the model
+> anova(fit, test="Chisq")
+
+> # finally calculate the Pseudo R-Square which is McFadden R-Square
+> library(pscl)
+> pR2(fit)
+> # This shows the output like this
+> #          llh           llhNull           G2        McFadden         r2ML         r2CU 
+> #       -392.4673941    -593.3275684  401.7203487    0.3385317    0.3629229    0.4930986 
+
+> # Now you apply the training results on the test data
+> # Test data should have same number of variables in the training data with also the final class output
+> # In this case, we need to take the Gender dataset and merge the class output with the test data
+
+> # Data prep for test
+> test <- read.csv("test1.csv", sep=",")
+> TestFr <- as.data.frame(test)
+> View(TestFr)
+> TestFr$Sex_R <- TestFr$Sex 
+> TestFr$Sex_R <- mapvalues(TestFr$Sex_R,from = c("female","male"), to = c(0,1))
+> TestFr$Embarked_R <- TestFr$Embarked
+> TestFr$Embarked_R <- mapvalues(TestFr$Embarked_R,from = c("C","Q","S"), to = c(1,2,3))
+> TestFr$Age_R <- TestFr$Age
+> summary(TestFr$Age_R)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   0.17   21.00   27.00   30.27   39.00   76.00      86 
+> # Doing the exact process replacing the missing values of Age with median
+> TestFr$Age_R[which(is.na(TestFr$Age_R))] <- 27
+> # There is one NA in the Fare column in the test data (when you run the summary)
+> # TestFr$Fare[(is.na(TestFr$Fare))] <- 0.0
+> # View the test data to review everything is in order
+> View(TestFr)
+
+> # Let's make a variable which copies the Survived varaible in the test data. 
+> #This will be handy when we develop the Classification error calculation.
+> Survived_testing <- TestFr$Survived
+
+> # Now applying test data on the model fitted through the training regression
+> fitted.result <- predict(fit,newdata=TestFr, type='response')
+> summary(fitted.result)
+> # See the results below. Somehow an NA's has been introduced. This can mess up the misclassification calcultations.
+> #   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+> # 0.01732 0.15680 0.58790 0.55440 0.96180 1.00000       1 
+> We have the remove the NA using the same trick
+> is.na(fitted.result)
+> which(is.na(fitted.result))
+> fitted.result[which(is.na(fitted.result))] <- .554
+> # View the fitted data
+> View(fitted.result)
+
+# Let's compute the probability in the fitted results from the true value based on the condition if the fitted value greater than .5 then 1
+> model_pred_dir <- ifelse(fitted.result > 0.5, 1,0)
+
+# Review the cconfusion metrix actual values vs. prediccted values. The diagonal of the metrix gives the misclassification error
+> table(model_pred_dir, Survived_testing)
+> #             Survived_testing
+> # model_pred_dir   0    1
+> #               0 190   6
+> #               1  76  146
+
+> # Calculate the misclassification error. In this case, misclassification error is 19.61%
+>  mean(model_pred_dir != Survived_testing)
+> # [1] 0.1961722
+> Accuracy<- 1- (mean(model_pred_dir != Survived_testing))
+> # Note Sensitivity= 190/(190+76)= 71.45
+> # Note Specificity=  146/(146+6) =146/152= 96.52
+
+> # Plot of ROC Curve
+> library(pROC)
+> g<- roc(TestFr$Survived ~ fitted.result, data = TestFr)
+> plot(g)
+
+> # A Better Way of Testing The Plot using ggplot
+> # library(ggplot2)
+> # library(ROCR)
+> # pred <- prediction(PredictTestdata,TestFr$Survived)  
+> # perf <- performance(pred, measure = "tpr", x.measure = "fpr")  
+> # plot(perf, col=rainbow(7), main="ROC curve For Titanic Survival", xlab="Specificity", ylab="Sensitivity")  
+> # abline(0, 1)
+
+
+> # Repeat the process with missing value processing in terms of mean imputation.
+
+
+test2 <- read.csv("test1.csv", sep=",")
+> TestFr <- as.data.frame(test2)
+> TestFr2 <- as.data.frame(test2)
+> TestFr2$Sex_R <- TestFr2$Sex 
+> TestFr2$Sex_R <- mapvalues(TestFr2$Sex_R,from = c("female","male"), to = c(0,1))
+> TestFr2$Embarked_R <- TestFr2$Embarked
+> TestFr2$Embarked_R <- mapvalues(TestFr2$Embarked_R,from = c("C","Q","S"), to = c(1,2,3))
+> TestFr2$Age_R <- TestFr2$Age
+> summary(TestFr2$Age_R)
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+#   0.17   21.00   27.00   30.27   39.00   76.00      86 
+> TestFr2$Age_R[which(is.na(TestFr2$Age_R))] <- 30.27
+> Survived_testing2 <- TestFr2$Survived
+> fitted.result2 <- predict(fit2,newdata=TestFr2, type='response')
+> summary(fitted.result2)
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.        NA's 
+#   0.01226 0.12180 0.29890 0.40250 0.68090 0.96560       1 
+
+# Remove the NA's with mean
+> View(fitted.result2)
+> fitted.result2[which(is.na(fitted.result2))] <- .402
+
+> model_pred_dir2 <- ifelse(fitted.result2 > 0.5, 1,0)
+> table(model_pred_dir2, Survived_testing2)
+#               Survived_testing2
+# model_pred_dir  2   0   1
+#                 0 253  11
+#                 1  13 141
+> mean(model_pred_dir2 != Survived_testing2)
+# [1] 0.05741627
+> Accuracy <- 1-.0574
+> # Accuray 94.26%
+
+# Developiing a tree model for the same problem
+
+> # Use the library rpart
+
+> library(rpart) 
+> fit_tree <- rpart(Survived ~ Age_R+ Sex_R+ Pclass+SibSp+ Parch+ Fare+ Embarked_R, method="class", data=TdataFr)
+
+> printcp(fit_tree)
+> plotcp(fit_tree)
+> summary(fit_tree)
+
+> # plot tree 
+> plot(fit_tree, uniform=TRUE,main="Classification Tree for Titanic")
+> text(fit_tree, use.n=TRUE, all=TRUE, cex=.8)
+> # create attractive postscript plot of tree 
+> post(fit_tree, file = "tree.ps",title = "Classification Tree for Titanic")
+
+> # Predicted on the test dataset
+
+> pred_tree <- predict(fit_tree,TestFr2)
+> summary(pred_tree)
+
+> # Applying Random Forest on the same problem
+> install.packages('randomForest')
+> library(randomForest)
+
+> # Build the model on the clean data 
+> # Make sure the data is clean on the random forest
+> fit_randomfor <- randomForest(as.factor(Survived) ~ Age_R+ Sex_R+ Pclass+SibSp+ Parch+ Fare+ Embarked_R, method="class", data=TdataFr, importance= TRUE, ntree=2000)
+> summary(fit_randomfor)
+
+> # Plot of various variables in terms of importance. This is super cool.
+> # Mean Decrease Accuracy - How much the model accuracy decreases if we drop that variable.
+> # Mean Decrease Gini - Measure of variable importance based on the Gini impurity index used for the calculation of splits in trees. 
+> # Higher the value of mean decrease accuracy or mean decrease gini score , higher the importance of the variable in the model.
+> varImpPlot(fit_randomfor)
+> # Inorder to understand the difference between training and test dataset you can use the str command
+> str(TdataFr)
+> str(TestFr)
+
+> # Buiilding a Neural Network Model 
+> # In this case, we will train the model, fine tune the model with a evaluation model and finally test the model
+> library(caret)
+> library(nnet)
+> # inTrain<- createDataPartition(TdataFr$Survived,p=0.8, list=FALSE)
+> # Plot first to see Age and Fare distribution to ensure they are not normal
+> # Remember Neural Net is a non linear classifier
+> plot(density(TdataFr$Age_R, na.rm = TRUE))
+> plot(density(TdataFr$Fare, na.rm = TRUE))
+> inTrain<- createDataPartition(TdataFr$Survived, p=0.8, list=FALSE)
+> training<-TdataFr[inTrain,]
+> evaluating<-TdataFr[-inTrain,]
+> # The nnet package requires that the target variable of the classification (i.e. Survived) to be in two-column matrix — one column for No and the other for Yes — with a 1/0 as appropriate.
+>#  Convert the Survived column by using the built-in utility class.ind function.
+> training$Surv = class.ind(training$Survived)
+> evaluating$Surv = class.ind(evaluating$Survived)
+> fitnn = nnet(Surv ~ Age_R+ Sex_R+ Pclass+SibSp+ Parch+ Fare+ Embarked_R, training, size=1, softmax=TRUE)
+> predictedNN<- predict(fitnn, TestFr) [,2]
+> predictedNN[is.na(predictedNN)]<-0
+> predictedNN[predictedNN >0.5]<-1
+> predictedNN[predictedNN <0.5]<-0
+> TestFr$Survived<-predictedNN
+> TestFr$Survived1<-predictedNN
+> View(TestFr)
+> # You will see the TestFr is the column 16
+> Next step is writing in a CSV
+> write.csv(TestFr[,1:16], "nnet-result1.csv", row.names = FALSE)
+> # Let's measure the predicted and actual in Neural Net
+NN_Result <- read.csv("nnet-result2.csv", sep=",")
+NN_result1 <- as.data.frame(NN_Result)
+> # See the Confusion Metrix
+> table(NN_Result$Survived,TestFr$Survived)
+> # Misclassification Error
+> mean(NN_result1$Survived !=TestFr$Survived)
+
+># Missing value Imputation
+> # Applying Regression to impute missing values for the dataset TD1
+> # library(rpart)
+> # Agefit <- rpart(Age ~ Pclass + Sex + SibSp + Parch + Fare + Embarked, data=TD1[!is.na(TD1$Age),], method="anova")
+> # TD1$Age[is.na(TD1$Age)] <- predict(Agefit, TD1[is.na(TD1$Age),])
+> # summary(TD1)
+
+
+> # Text Mining in R https://github.com/MJFND/R/blob/master/Titanic/ML_Titanic_Data_Set.R
+> # How it is built in DataScience DOJO using Caret, SNOW, XGBOOST, BagImpute
+https://github.com/MJFND/R/blob/master/Titanic/ML_Titanic_Data_Set.R
+
+setwd("~/Kaggle-Challenge-Titanic")
+Tdata <- read.csv("train.csv", sep=",")
+TdataFr <- as.data.frame(Tdata)
+str(TdataFr)
+summary(TdataFr$Age)
+
+TdataFr$MissingAge <- ifelse(is.na(TdataFr$Age),"Y","N")
+TdataFr$MissingAge <- as.factor(TdataFr$MissingAge)
+TdataFr$Survived <- as.factor(TdataFr$Survived)
+TdataFr$Pclass <- as.factor(TdataFr$PClass)
+
+> # Changing the ones into factors
+TdataFr$Pclass <- as.factor(TdataFr$Pclass)
+TdataFr$Sex <- as.factor(Tdata$Sex)
+TdataFr$Embarked <- as.factor(TdataFr$Embarked)
+TdataFr$Sex <- as.factor(TdataFr$Sex)
+TdataFr$MissingAge <- as.factor(TdataFr$MissingAge)
+features <- c("Survived","Pclass","Sex","Age","Parch","Fare","Embarked","MissingAge")
+TdataFr <- TdataFr[,features]
+str(TdataFr)
+
+dummy.vars <- dummyVars(~.,data=TdataFr[,-1])
+train.dummy <- predict(dummy.vars,TdataFr[,-1])
+View(train.dummy)
+pre.process <- preProcess(train.dummy, method= 'bagImpute')
+Imputed.data <- predict(pre.process,train.dummy)
+View(Imputed.data)
+
+train$Age <- imputed.data[, 6]		
+View(train)		
+> library(e1071)	
+> library(caret)
+> library(doSNOW)
+> library(doSNOW)
+> library(ipred)
+> library(xgboost)
+
+set.seed(54321)
+indexes <- createDataPartition(TdataFr$Survived,times=1,p=0.7,list=FALSE)
+training<-TdataFr[indexes,]
+evaluating <- TdataFr[-indexes,]
+prop.table(table(TdataFr$Survived))
+prop.table(table(training$Survived))
+prop.table(table(evaluating$Survived))
+
+> # Setup Carot to perform 10 fold crosss validation repeated 3 times
+> # Use Grid Search to Optimal model hyperparameter
+> # 3* 10 times model is done..cross validating is a mean how well the model is function in producction..It is better for estimation more times it is run.. It is defnitely expensive...On top of that we added a grid search
+
+traincontrol <- trainControl(method="repeatedcv",number=10,repeats=3,search="grid")
+
+
+tunegrid <- expand.grid(eta=c(0.05,0.075,.1),nrounds=c(50,75,100),max_depth=6:8,min_child_weight=c(2.0,2.25,2.5),colsample_bytree=c(0.3,0.4,0.5),gamma=0,subsample=1)
+
+View(tunegrid)
+> # note this has 243 things..
+> # essentially 3*10*243 distinct values..
+> # Do parallel processing using doSNOW package
+library(doSNOW)
+> # 2 repesents the number of clusters...In a big machine it can be 10
+cl <- makeCluster(2, type="SOCK")
+registerDoSNOW(cl)
+
+> # Train the xgboost model ussing 10 fold CV repeated for 3 times
+> # Also, include a hyperparameter grid search to train the optimal model
+install.packages("xgboost")
+library(xgboost)
+library(plyr)
+caretcv <- train(Survived ~.,data=training,method="xgbTree", tuneGrid=tunegrid,trControl=traincontrol)
+stopCluster(cl)
+caretcv
+pred <- predict(caretcv,evaluating)
+confusionMatrix(pred,evaluating$Survived)
+
+# How to change Factor into numeric 
+# This is the simpliest solution for the dataset TD1 and variable CBScore_R1
+> TD1$CBScore_R1 <- data.matrix(TD1$CBScore_R)
+> TD1$CBScore_R1 <- as.numeric(as.character(TD1$CBScore_R1))
+
+# Other solution
+> library(magrittr)
+> TD1$CBScore_R3 <- unclass(TD1$CBScore_R3) %>% as.numeric 
+
+# Also changing a Factor to a character
+> TD1$CBScore_R2 <- data.matrix(TD1$CBScore_R)
+> sapply(TD1$CBScore_R2,function(x) as.numeric(as.character(TD1$CBScore_R2)))
+
+
+WHERE Keyword like '%car%'")

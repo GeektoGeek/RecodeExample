@@ -1,0 +1,101 @@
+### Bring the cleaned preprocessed data-set into R environment
+
+DataN1<- read.csv("FinalData1modi2.csv", sep=",")
+str(DataN1)
+str(DataN1$Optical_PW_10C)
+str(DataN1$Ope_Curr_CuredFer)
+str(DataN1$PER_NoEp)
+View(DataN1)
+str(DataN1)
+save.image("~/CodeForAllProjects/R/KnowData_Project/R&DWithPre-Burn-IN/PoC_PreburnIN/With_Pass_Fail_Label/Code-5-18CleanData.RData")
+
+savehistory("~/CodeForAllProjects/R/KnowData_Project/R&DWithPre-Burn-IN/PoC_PreburnIN/With_Pass_Fail_Label/Code-5-18CleanData.RData")
+###
+summary(DataN1)
+
+#### Remove NA values...
+
+DDD<- DataN1[!(rowSums(is.na(DataN1))),]
+summary(DDD)
+View(DDD)
+
+### take out all the predictors and Pass Fail Target
+
+DDD1<- DDD  %>% select(-OSC, - Date, -SetCurr,-CyclesComp,-ModelockFaults,-MaxMLTime,-CountML_t_gt_tar,-CountMl_t_gt_spec,-AvgPower,-X3Sigma,-Peak_Peak, -PowerDrift)
+View(DDD1)
+str(DDD1)
+### Make sure to convert Pass-Fail to a factor variable
+
+DDD1$Pass1_Fail0 <- as.factor(DDD1$Pass1_Fail0)
+View(DDD1)
+
+library(caret)
+library(h2o)
+
+### Create the partition of the variables
+
+table(DDD1$Pass1_Fail0)
+prop.table(table(DDD1$Pass1_Fail0))
+b <- createDataPartition(DDD1$Pass1_Fail0, p = 0.8, list=FALSE)
+trainingDDD <- DDD1[b,]
+testingDDD <- DDD1[-b,]
+prop.table(table(trainingDDD$Pass1_Fail0))
+prop.table(table(testingDDD$Pass1_Fail0))
+b1 <- createDataPartition(trainingDDD$Pass1_Fail0, p = 0.8, list=FALSE)
+trainDDD <- trainingDDD[b1,]
+validDDD <- trainingDDD[-b1,]
+testDDD <- testingDDD
+
+### Fire on the H2o with a predifed setup to make the performance scalable
+library(h2o)
+
+h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+
+### Change the data to H2o frame
+
+trainDDD_h2o <- as.h2o(trainDDD)
+validDDD_h2o <- as.h2o(validDDD)
+testDDD_h2o <- as.h2o(testDDD)
+
+### Set it up in H2o
+View(trainingDDD)
+y <- "Pass1_Fail0"
+x <- setdiff(names(trainDDD_h2o), c(y))
+set.seed(1008)
+
+### Run the model use AutoML setup as a setup in R and H2o to run
+#### Distributed random Forest, GBM (Gradient Boosting),GLM (General Linear/logistic regression),
+#### GBM Grid Search,Deep Learning,Stacked ensemble models
+
+automl_models_h2oDDD <- h2o.automl(
+x = x,
+y = y,
+training_frame    = trainDDD_h2o,
+validation_frame  = validDDD_h2o,
+max_runtime_secs  = 45
+)
+
+### Select the champion model
+automl_models_h2oDDD@leader
+
+### Perform the prediction on the champion model
+pred_validDDDh2o <- h2o.predict(automl_models_h2oDDD@leader, newdata = validDDD_h2o)
+pred_validDDD<- as.data.frame(pred_validDDDh2o)
+validDDD_label<- cbind(validDDD,pred_validDDD)
+Acc_AutoMLValidDD<- 1- (mean(validDDD_label$Pass1_Fail0!= validDDD_label$predict))
+pred_testDDDh2o <- h2o.predict(automl_models_h2oDDD@leader, newdata = testDDD_h2o)
+pred_testDDD<- as.data.frame(pred_testDDDh2o)
+testDDD_label<- cbind(testDDD,pred_testDDD)
+Acc_AutoMLtestDD<- 1- (mean(testDDD_label$Pass1_Fail0!= testDDD_label$predict))
+table(validDDD_label$Pass1_Fail0, validDDD_label$predict)
+table(testDDD_label$Pass1_Fail0, testDDD_label$predict)
+perf <- h2o.performance(automl_models_h2oDDD@leader, newdata = testDDD_h2o)
+h2o.plot(perf)
+plot(perf)
+h2o.varimp_plot(automl_models_h2oDDD@leader)
+savehistory("~/CodeForAllProjects/R/KnowData_Project/R&DWithPre-Burn-IN/PoC_PreburnIN/With_Pass_Fail_Label/Code-5-18CleanDataFinal.Rhistory")
+perf1 <- h2o.performance(automl_models_h2oDDD@leader, newdata = testDDD_h2o)
+plot(h2o.performance(perf1))
+plot(perf1)
+perf1
+savehistory("~/CodeForAllProjects/R/KnowData_Project/R&DWithPre-Burn-IN/PoC_PreburnIN/With_Pass_Fail_Label/Code-5-18CleanDataFinal.Rhistory")

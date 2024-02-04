@@ -1,0 +1,147 @@
+setwd("~/CodeForAllProjects/R/KnowData_Project/R&DWithPre-Burn-IN")
+Data<- read.csv("t_Data1.csv", sep=",")
+View(Data)
+summary(Data)
+library(plyr)
+library(plyr)
+install.packages("gdata")
+install.packages("dplyr")
+library(dplyr)
+library(gdata)
+View(ds)
+ds<- Data %>% mutate(y = Pass_Fail) %>% select(-OSC, - Date, -SetCurrent,-CyclesComplete,-ModelockFaults,-MaxMLTime,-CountMLtimegt_target,-CountMltimegt_spec,-AveragePower,-X3Sigma,-PeakPeak, -PowerDrift)
+tds <- data.frame(model.matrix( ~ .- 1, data=ds))
+cor_tds <- cor(tds, tds, method = "pearson")
+cor_tds1 <- cor(tds, tds, method = "spearman")
+cor_df<- data.frame(cor=cor_tds[2:324,1], varn = names(cor_tds[2:324,1]))
+cor_df<- cor_df %>% mutate(cor_abs = abs(cor)) %>% arrange(desc(cor_abs))
+plot(cor_df$cor_abs, type="l")
+list_varn <- cor_df %>% filter(cor_abs>0.02)
+filter_df <- data.frame(tds) %>% select(Pass_Fail,one_of(as.character(list_varn$varn)))
+head(filter_df)
+install.packages("corrgram")
+library(corrgram)
+corrgram(filter_df,lower.panel=panel.cor,upper.panel=panel.pie, cor.method = "pearson")
+install.packages("corrplot")
+library(corrplot)
+corrplot(filter_df, method="number")
+corrplot(ds, method="number")
+View(filter_df)
+### Developing the PCA
+xv <- filter_df %>% select(-y)
+pca = prcomp(xv, scale. = T, center = T)
+plot(pca, type="l")
+summary(pca)
+cor_tds <- cor(tds, tds, method = "pearson")
+cor_df<- data.frame(cor=cor_tds[2:324,1], varn = names(cor_tds[2:324,1]))
+cor_df<- cor_df %>% mutate(cor_abs = abs(cor)) %>% arrange(desc(cor_abs))
+plot(cor_df$cor_abs, type="l")
+xv <- filter_df %>% select(-y)
+pca = prcomp(xv, scale. = T, center = T)
+plot(pca, type="l")
+summary(pca)
+spca = summary(pca)
+plot(spca$importance[3,], type="l")
+pca_df <- data.frame(pca$x)
+pca_df1<- subset(pca_df, select=PC1:PC20)
+pca_df1$y = filter_df$y
+View(pca_df1)
+corrgram(pca_df1,lower.panel=panel.cor,upper.panel=panel.pie)
+filter_df2<- filter_df[c(2:10)]
+corrgram(filter_df2,lower.panel=panel.cor,upper.panel=panel.pie, cor.method = "pearson")
+filter_df3<- filter_df[c(2,10:25)]
+corrgram(filter_df3,lower.panel=panel.cor,upper.panel=panel.pie, cor.method = "pearson")
+filter_df4<- filter_df[c(2,25:40)]
+corrgram(filter_df4,lower.panel=panel.cor,upper.panel=panel.pie, cor.method = "pearson")
+filter_df5<- filter_df[c(2,40:55)]
+corrgram(filter_df5,lower.panel=panel.cor,upper.panel=panel.pie, cor.method = "pearson")
+filter_df6<- filter_df[c(2,55:70)]
+corrgram(filter_df6,lower.panel=panel.cor,upper.panel=panel.pie, cor.method = "pearson")
+filter_df7<- filter_df[c(2,70:85)]
+corrgram(filter_df7,lower.panel=panel.cor,upper.panel=panel.pie, cor.method = "pearson")
+filter_df8<- filter_df[c(2,85:100)]
+corrgram(filter_df8,lower.panel=panel.cor,upper.panel=panel.pie, cor.method = "pearson")
+summary(lm(data = filter_df1, y ~ .))
+summary(lm(data = filter_df2, y ~ .))
+summary(lm(data = filter_df3, y ~ .))
+summary(lm(data = filter_df8, y ~ .))
+View(ds)
+ds1<- ds
+ds1$Pass_Fail<- as.factor(ds1$Pass_Fail)
+library(glmnet)
+library(caret)
+library(islr)
+library(ISLR)
+install.packages("ISLR")
+library(ISLR)
+library(caret)
+
+lambda.grid<- 10^seq(2,-2, length=100)
+alpha.grid<- seq(0,1, length=10)
+trnCtrl=trainControl(method="repeatedCV", number=10, repeats=5)
+srchGrd= expand.grid(.alpha=alpha.grid, .lambda=lambda.grid)
+
+my.train<- train(Pass_Fail~., data=ds1, method="glmnet", tuneGrid=srchGrd, trControl=trnCtrl,standardize=TRUE, maxit=100000)
+
+plot(my.train)
+
+attributes(my.train)
+
+my.glmnet.model<- my.train$finalModel
+
+coef(my.glmnet.model, s=my.train$bestTune$lambda)
+
+tab<- cor(DataInterest)
+write.csv(tab[,1:5], "tab.csv", row.names = FALSE)
+
+
+filter_df8_U<- filter_df[c(2,85:96)]
+
+corrgram(filter_df8_U,lower.panel=panel.cor,upper.panel=panel.pie, cor.method = "pearson")
+
+str(filter_df8_U)
+View(ds1)
+View(ds1)
+
+dtest<- Data %>% mutate(y = Pass_Fail) %>% select(-OSC, - Date, -SetCurrent,-CyclesComplete,-ModelockFaults,-MaxMLTime,-CountMLtimegt_target,-CountMltimegt_spec,-AveragePower,-X3Sigma,-PeakPeak, -PowerDrift)
+View(Data)
+
+dtest1<- Data %>% mutate(y =-MaxMLTime ) %>% select(-OSC, - Date, -SetCurrent,-CyclesComplete,-ModelockFaults,Pass_Fail,-CountMLtimegt_target,-CountMltimegt_spec,-AveragePower,-X3Sigma,-PeakPeak, -PowerDrift)
+
+dtest2<- Data %>% mutate(y =-AveragePower) %>% select(-OSC, - Date, -SetCurrent,-CyclesComplete,-ModelockFaults,Pass_Fail,-CountMLtimegt_target,-CountMltimegt_spec,-MaxMLTime,-X3Sigma,-PeakPeak, -PowerDrift)
+View(dtest1)
+
+
+dtest3<- Data %>% mutate(y =-X3Sigma) %>% select(-OSC, - Date, -SetCurrent,-CyclesComplete,-ModelockFaults,Pass_Fail,-CountMLtimegt_target,-CountMltimegt_spec,-MaxMLTime,-AveragePower,-PeakPeak, -PowerDrift)
+
+dtest4<- Data %>% mutate(y =-PeakPeak) %>% select(-OSC, - Date, -SetCurrent,-CyclesComplete,-ModelockFaults,Pass_Fail,-CountMLtimegt_target,-CountMltimegt_spec,-MaxMLTime,-AveragePower,-X3Sigma,-PowerDrift)
+
+View(dtest)
+dtestl<- subset(dtest, select= c(-90))
+dtestl1<- subset(dtest, select= c(-90))
+View(dtest1)
+dtestl2<- subset(dtest1, select= c(-2,-91))
+View(dtest2)
+dtestl3<- subset(dtest2, select= c(-2,-91))
+dtestl<- subset(dtest, select= c(-90))
+View(dtest1)
+dtestl1<- subset(dtest1, select= c(-2,91))
+dtestl1<- subset(dtest1, select= c(-2,-91))
+View(dtest2)
+dtestl2<- subset(dtest2, select= c(-2,-91))
+dtestl3<- subset(dtest3, select= c(-2,-91))
+dtestl4<- subset(dtest4, select= c(-2,-91))
+
+View(dtestl)
+
+summary(lm(data = dtestl, Pass_Fail ~ .))
+View(dtestl1)
+summary(lm(data = dtestl1, MaxMLTime ~ .))
+View(dtestl2)
+summary(lm(data = dtestl2, AveragePower ~ .))
+View(dtestl3)
+summary(lm(data = dtestl3, X3Sigma ~ .))
+View(dtestl4)
+summary(lm(data = dtestl3, PeakPeak ~ .))
+summary(lm(data = dtestl4, PeakPeak ~ .))
+savehistory("~/CodeForAllProjects/R/KnowData_Project/R&DWithPre-Burn-IN/RCode4-20.Rhistory")

@@ -1,0 +1,109 @@
+setwd("~/Documents")
+setwd("~/Documents/AttributionModel/AttributionmodelFullDataSet")
+setwd("~/Documents/AttributionModel/AttributionmodelFullDataSet/Att9-02-2019")
+### Let's bring the original data
+DF<- read.csv("Data09012019.csv.csv", sep=",")
+DF<- read.csv("Data09012019.csv", sep=",")
+View(DF)
+Let's take out CIS and Face.to.Face events as I combined them into one category FacetoFaceEvents
+## Let's take out CIS and Face.to.Face events as I combined them into one category FacetoFaceEvents
+## Let's take out CIS and Face.to.Face events as I combined them into one category FacetoFaceEvents
+DF1<- seubset(DF, select=c(-5,-14))
+DF1<- subset(DF, select=c(-5,-14))
+View(DF1)
+### NB ContactUsorDemo is twice..take one of them out
+DF1<- subset(DF1, select=c(-7))
+### Let's make sure to change the target to factor
+DF1$CreateOrNot<- as.factor(DF1$CreateOrNot)
+View(DF1)
+install.packages("caret")
+library(caret)
+install.packages("h2o")
+library(h2o)
+library(caret)
+a <- createDataPartition(DF1$CreateOrNot, p = 0.8, list=FALSE)
+Create_tr <- DF1[a,]
+Create_test<- DF1[-a,]
+a1 <- createDataPartition(Create_tr$CreateOrNot,p = 0.8,list=FALSE)
+train <- Create_tr[a1,]
+valid<- Create_tr[-a1,]
+test<- Create_test
+h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+train_h2o <- as.h2o(train)
+valid_h2o <- as.h2o(valid)
+test_h2o <- as.h2o(test)
+y <- "CreateOrNot"
+x <- setdiff(names(train_h2o), c(y, "OpportunityId18digits"))
+set.seed(1000)
+aml1 <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 999999999,
+max_models=20,
+seed=2
+)
+aml1
+aml1@leader
+perf <- h2o.performance(aml@leader, newdata = test_h2o)
+perf <- h2o.performance(aml1@leader, newdata = test_h2o)
+perf
+lb <- automl_models_h2o@leaderboard
+lb
+lb <- aml1@leaderboard
+lb
+model_ids <- as.data.frame(aml1@leaderboard$model_id)[,1]
+View(model_ids)
+m1 <- h2o.getModel(model_ids[10])
+h2o.varimp_plot(h2o.getModel(model_ids[10])
+)
+h2o.plot(perf)
+perf
+h2o.plot(perf)
+perf <- h2o.performance(aml1@leader, newdata = test_h2o)
+perf1<- as.data.frame(perf)
+perf <- h2o.performance(aml1@leader, newdata = test_h2o)
+perf1<-as.data.frame(perf)
+h2o.plot(perf)
+plot(aml1@leader, type="roc", main="ROC Curve for Best Model")
+plot(perf, type="roc", main="ROC Curve for Best Model")
+perf <- h2o.performance(aml1@leader, newdata = test_h2o)
+plot(perf, type="roc", main="ROC Curve for Best Model")
+h2o.auc(h2o.performance(aml1@leader, income_h2o_test))
+h2o.auc(h2o.performance(aml1@leader, h2o_test))
+h2o.auc(h2o.performance(aml1@leader, newdata = test_h2o))
+savehistory("~/Documents/AttributionModel/AttributionmodelFullDataSet/Att9-02-2019/Rcode-9-2-2019.Rhistory")
+h2o.getModel(aml1@leaderboard$metalearner$name)@model$coefficients_table
+h2o.getModel(aml1@leaderboard$metalearner$name)@model_id$coefficients_table
+h2o.getModel((aml1@leaderboard$metalearner$name)@model_id)[,1]
+h2o.getModel((aml1@leaderboard$metalearner$name)@model_ids)[,1]
+h2o.getModel((aml1@leaderboard$metalearner$name)
+)
+h2o.getModel(aml1@leader$metalearner$name)@model$coefficients_table
+AA<-h2o.getModel(aml1@leader$$metalearner$name)
+AA<-h2o.getModel(aml1@leader$metalearner$name)
+# Get model ids for all models in the AutoML Leaderboard
+model_ids <- as.data.frame(aml1@leaderboard$model_id)[,1]
+# Get the "All Models" Stacked Ensemble model
+se <- h2o.getModel(grep("StackedEnsemble_AllModels", model_ids, value = TRUE)[1])
+# Get the Stacked Ensemble metalearner model
+metalearner <- h2o.getModel(se@model$metalearner$name)
+View(metalearner)
+h2o.varimp(metalearner)
+h2o.varimp_plot(metalearner)
+savehistory("~/Documents/AttributionModel/AttributionmodelFullDataSet/Att9-02-2019/Rcode-9-2-2019.Rhistory")
+h2o.varimp_plot(metalearner)
+View(lb)
+lb
+h2o.varimp(metalearner)
+savehistory("~/Documents/AttributionModel/AttributionmodelFullDataSet/Att9-02-2019/AttributionRCodeUpdated09022019")
+h2o.varimp(h2o.getModel(model_ids[10])
+)
+save.image("~/Documents/AttributionModel/AttributionmodelFullDataSet/Att9-02-2019/AttributionRCodeUpdated09022019.RData")
+m1
+perf_gbm <- h2o.performance(h2o.getModel(model_ids[10]), newdata = test_h2o)
+perf_gbm
+save.image("~/Documents/AttributionModel/AttributionmodelFullDataSet/Att9-02-2019/AttributionRCodeUpdated09022019.RData")
+savehistory("~/Documents/AttributionModel/AttributionmodelFullDataSet/Att9-02-2019/AttributionRCodeUpdated09022019.Rhistory")
+savehistory("~/Documents/AttributionModel/AttributionmodelFullDataSet/Att9-02-2019/AttributionRCodeUpdated09022019")

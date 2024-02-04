@@ -1,0 +1,365 @@
+setwd("~/Documents")
+setwd("~/Documents/AttributionModel/AttributionmodelFullDataSet")
+Merge_DF1<- read.csv("Merge_DF1.csv", sep=",")
+View(Merge_DF1)
+View(Merge_DF1)
+install.packages("plyr")
+library(plyr)
+Merge_DF1$TypeR <- mapvalues(Merge_DF1,from = c("Base","Free","New","Prospect","Renewal","Services Only","Trial","NA"), to = c(0,1,2,3,4,5,6,7))
+install.packages("dplyr")
+library(dplyr)
+Merge_DFF$TypeR <- dplyr::recode(Merge_DFF$TypeR, "Base"=0,"Free"=1,"New"=2,"Prospect"=3,"Renewal"=4,"Services Only"=5,"Trial"=6,"7"=7)
+Merge_DF1$TypeR <- dplyr::recode(Merge_DF1$TypeR, "Base"=0,"Free"=1,"New"=2,"Prospect"=3,"Renewal"=4,"Services Only"=5,"Trial"=6,"7"=7)
+View(Merge_DF1)
+Merge_DF1$OpportunityInitiatedByR<-Merge_DF1$OpportunityInitiatedBy
+View(Merge_DF1)
+View(Merge_DF1)
+Merge_DFF$OpportunityInitiatedByR <- as.character(Merge_DFF$OpportunityInitiatedByR)
+Merge_DFF$OpportunityInitiatedByR[Merge_DFF$OpportunityInitiatedByR ==""] <- "NA"
+Merge_DF1$OpportunityInitiatedByR <- as.character(Merge_DF1$OpportunityInitiatedByR)
+Merge_DF1$OpportunityInitiatedByR[Merge_DF1$OpportunityInitiatedByR ==""] <- "NA"
+Merge_DF1$OpportunityInitiatedByR<-recode(Merge_DF1$OpportunityInitiatedByR,'Marketing'=0,'Partner'=1,'Renewal'=2, 'Sales'=3,'NA'=4)
+View(Merge_DF1)
+Merge_DF1$TypeR<- as.factor(Merge_DF1$TypeR)
+Merge_DF1$OpportunityInitiatedByR<- as.factor(Merge_DF1$OpportunityInitiatedByR)
+Merge_DF1$WinOrNot<- as.factor(Merge_DF1$WinOrNot)
+Merge_DF1$CreateOrNot<- as.factor(Merge_DF1$CreateOrNot)
+str(Merge_DF1)
+write.csv(Merge_DF1[,1:51], "Merge_DF2.csv", row.names = FALSE)
+install.packages("caret")
+library(caret)
+View(Merge_DF1)
+Create_DF<- seubset(Merge_DF1, select=c(1,2,c(13:47),49,50,51))
+Create_DF<- subset(Merge_DF1, select=c(1,2,c(13:47),49,50,51))
+Win_DF<- subset(Merge_DF1, select=c(1,2,c(13:47),48,50,51))
+### For create let's eliminate the AccountId
+View(Create_DF)
+Create_DF1<- subset(Create_DF, select=c(-1))
+View(Create_DF1)
+install.packages("h2o")
+library(h2o)
+library(caret)
+a <- createDataPartition(Create_DF1$CreateOrNot, p = 0.8, list=FALSE)
+Create_tr <- Create_DF1[a,]
+Create_test<- Create_DF1[-a,]
+a1 <- createDataPartition(Create_tr$CreateOrNot,p = 0.8,list=FALSE)
+train <- Create_tr[a1,]
+valid<- Create_tr[-a1,]
+test<- Create_test
+h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+train_h2o <- as.h2o(train)
+valid_h2o <- as.h2o(valid)
+test_h2o <- as.h2o(test)
+y <- "CreateOrNot"
+View(train)
+x <- setdiff(names(train_h2o), c(y, "OpportunityId18digits"))
+set.seed(1000)
+automl_models_h2o <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 999999999,
+max_models=15,
+seed=1
+)
+automl_models_h2o@leader
+View(train)
+### Predict
+pred_h2o <- h2o.predict( automl_models_h2o@leader, newdata = test_h2o)
+pred<- as.data.frame(pred_h2o)
+View(pred)
+Create_test<- cbind(Create_test,predict)
+test<- cbind(test,predict)
+test<- cbind(test,pred)
+View(test)
+Accuracy_AMLeader<- 1- (mean(Create_test$CreateOrNot!= Create_test$predict))
+Accuracy_AMLeader
+Accuracy_AMLeader<- 1- (mean(test$CreateOrNot!= test$predict))
+Accuracy_AMLeader
+h2o.varimp_plot(automl_models_h2o@leader)
+perf <- h2o.performance(automl_models_h2o@leader, newdata = test)
+perf <- h2o.performance(automl_models_h2o@leader, newdata = test_h2o)
+perf
+savehistory("~/Documents/AttributionModel/AttributionmodelFullDataSet/RcodeAug26.Rhistory")
+set.seed(66000)
+automl_models_h2o1 <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o,
+validation_frame  = valid_h2o,
+max_runtime_secs  = 999999999,
+max_models=18,
+seed=1
+)
+automl_models_h2o1
+automl_models_h2o1@leader
+lb <- automl_models_h2o@leaderboard
+print(lb, n = nrow(lb))
+lb <- automl_models_h2o@leaderboard
+lb
+### Predict
+pred_h2o222 <- h2o.predict( automl_models_h2o@GBM_5_AutoML_20190826_105619, newdata = test_h2o)
+model_ids <- as.data.frame(automl_models_h2o@leaderboard$model_id)[,1]
+GBM_5_AutoML_20190826_105619
+lb <- automl_models_h2o@leaderboard
+lb
+lb<- as.data.frame(lb)
+m <- h2o.getModel(automl_models_h2o[2])
+m <- h2o.getModel(lb[2])
+m <- h2o.getModel(automl_models_h2o1[2])
+### Predict
+pred_h2o222 <- h2o.predict(GBM_5_AutoML_20190826_105619, newdata = test_h2o)
+lb1<-lb <- automl_models_h2o@leaderboard
+lb1
+### Predict
+pred_h2o222 <- h2o.predict(GBM_5_AutoML_20190826_105619, newdata = test_h2o)
+model_ids <- as.data.frame(automl_models_h2o@leaderboard$model_id)[,1]
+automl_models_h2o@leader
+lb <- automl_models_h2o@leaderboard
+lb
+### Predict
+pred_h2o <- h2o.predict( automl_models_h2o@leader, newdata = test_h2o)
+se <- h2o.getModel(grep("StackedEnsemble_AllModels", model_ids, value = TRUE)[1])
+se <- h2o.getModel(grep("StackedEnsemble_AllModels", model_id, value = TRUE)[1])
+model_ids <- as.data.frame(automl_models_h2o@leaderboard$model_id)[,1]
+)
+)
+gbm <- h2o.gbm(
+## standard model parameters
+x = x,
+y = y,
+training_frame = train,
+validation_frame = valid,
+## more trees is better if the learning rate is small enough
+## here, use "more than enough" trees - we have early stopping
+ntrees = 10000,
+## smaller learning rate is better (this is a good value for most datasets, but see below for annealing)
+learn_rate=0.01,
+## early stopping once the validation AUC doesn't improve by at least 0.01% for 5 consecutive scoring events
+stopping_rounds = 5, stopping_tolerance = 1e-4, stopping_metric = "AUC",
+## sample 80% of rows per tree
+sample_rate = 0.8,
+## sample 80% of columns per split
+col_sample_rate = 0.8,
+## fix a random number generator seed for reproducibility
+seed = 1234,
+## score every 10 trees to make early stopping reproducible (it depends on the scoring interval)
+score_tree_interval = 10
+)
+gbm <- h2o.gbm(
+## standard model parameters
+x = x,
+y = y,
+training_frame = train_h2o,
+validation_frame = valid_h20,
+## more trees is better if the learning rate is small enough
+## here, use "more than enough" trees - we have early stopping
+ntrees = 10000,
+## smaller learning rate is better (this is a good value for most datasets, but see below for annealing)
+learn_rate=0.01,
+## early stopping once the validation AUC doesn't improve by at least 0.01% for 5 consecutive scoring events
+stopping_rounds = 5, stopping_tolerance = 1e-4, stopping_metric = "AUC",
+## sample 80% of rows per tree
+sample_rate = 0.8,
+## sample 80% of columns per split
+col_sample_rate = 0.8,
+## fix a random number generator seed for reproducibility
+seed = 1234,
+## score every 10 trees to make early stopping reproducible (it depends on the scoring interval)
+score_tree_interval = 10
+)
+gbm <- h2o.gbm(
+## standard model parameters
+x = x,
+y = y,
+training_frame = train_h2o,
+validation_frame = valid_h2o,
+## more trees is better if the learning rate is small enough
+## here, use "more than enough" trees - we have early stopping
+ntrees = 10000,
+## smaller learning rate is better (this is a good value for most datasets, but see below for annealing)
+learn_rate=0.01,
+## early stopping once the validation AUC doesn't improve by at least 0.01% for 5 consecutive scoring events
+stopping_rounds = 5, stopping_tolerance = 1e-4, stopping_metric = "AUC",
+## sample 80% of rows per tree
+sample_rate = 0.8,
+## sample 80% of columns per split
+col_sample_rate = 0.8,
+## fix a random number generator seed for reproducibility
+seed = 1234,
+## score every 10 trees to make early stopping reproducible (it depends on the scoring interval)
+score_tree_interval = 10
+)
+pred_gbm <- h2o.predict(gbm, newdata = test_h2o)
+gbm
+h2o.varimp_plot(gbm)
+View(Create_DF)
+View(Create_DF)
+View(Create_test)
+View(Create_tr)
+View(Create_DF)
+Accuracy_AMLeader
+### After Discussing with Aaron and Alex
+###
+View(Create_DF1)
+Create_DFClean<- subset(Create_DF1, select=c(-17,-36,-38,-39))
+### Create_DFClean we removed TypeR, Opertional, OpportunityInitiatedBy, TotalChannel
+View(Create_DFClean)
+p <- createDataPartition(Create_DFClean$CreateOrNot, p = 0.8, list=FALSE)
+CreateClean_tr <- CreateDF[p,]
+CreateClean_test<- CreateDF[-p,]
+p <- createDataPartition(Create_DFClean$CreateOrNot, p = 0.8, list=FALSE)
+CreateClean_tr <- Create_DFClean[p,]
+CreateClean_test<- Create_DFClean[-p,]
+q <- createDataPartition(CreateClean_tr$CreateOrNot,p = 0.8,list=FALSE)
+Create_Cleantrain <- CreateClean_tr[q,]
+Create_Cleanvalid<-  CreateClean_tr[-q,]
+View(Merge_DF1)
+Create_Cleantest<- CreateClean_test
+Create_Cleantest<- CreateClean_test
+Crtrain_h2o <- as.h2o(Create_Cleantrain)
+Crvalid_h2o <- as.h2o(Create_Cleanvalid)
+Crtest_h2o <- as.h2o(Create_Cleantest)
+View(Create_DF)
+View(Create_Cleantrain)
+y2 <- "CreateOrNot"
+x2 <- setdiff(names(Crtrain_h2o), c(y2, "OpportunityId18digits"))
+set.seed(11)
+automl_models_h2o <- h2o.automl(
+x = x2,
+y = y2,
+training_frame    = Crtrain_h2o,
+validation_frame  = Crvalid_h2o,
+max_runtime_secs  = 999999999,
+max_models=22,
+seed=1
+)
+set.seed(12)
+aml<- h2o.automl(
+x = x2,
+y = y2,
+training_frame    = Crtrain_h2o,
+validation_frame  = Crvalid_h2o,
+max_runtime_secs  = 999999999,
+max_models=18,
+seed=1
+)
+aml
+aml@leader
+predaml_h2o <- h2o.predict( aml_models_h2o@leader, newdata = Create_Cleantest)
+predaml_h2o <- h2o.predict( aml@leader, newdata = Create_Cleantest)
+View(Create_DF1)
+predaml_h2o <- h2o.predict(aml@leader, newdata = Create_Cleantest)
+predaml_h2o <- h2o.predict( aml_models_h2o@leader, newdata = Crtest_h2o)
+predaml_h2o <- h2o.predict(aml@leader, newdata = Crtest_h2o)
+lb <- aml@leaderboard
+lb
+predaml<- as.data.frame(predaml_h2o)
+Create_Cleantest1<- cbind(Create_Cleantest,predaml)
+Acc_AMLeader<- 1- (mean(Create_Cleantest1$CreateOrNot!= Create_Cleantest1$predict))
+Acc_AMLeader
+h2o.varimp_plot(aml@leader)
+savehistory("~/Documents/AttributionModel/AttributionmodelFullDataSet/DRFCode8-26.Rhistory")
+# Direct Sales 10
+View(q)
+View(predaml)
+View(Create_DF1)
+## Direct to Website 11, Google SEO 15, List Uploads 16, Other 18, Other SEO 19, partner Referral and Referrals 23, 24, PIC Website and POC Website 16,27, SDR List Import 28, Search Pay Per Click 29, training 32
+### After Alex provided the list
+Create_AA<- subset(Create_DF1, select=c(11, 15, 16, 17, 18, 19, 23, 24, 26, 27, 28, 29, 32, 36, 38, 39))
+View(Create_AA)
+View(Create_AA)
+View(Create_DF1)
+View(Create_DF1)
+Create_AA<- subset(Create_DF1, select=c(-11, -15, -16, -17, -18, -19, -23, -24, -26, -27, -28, -29, -32, -36, -38, -39))
+View(Create_AA)
+### This is the dataset Alex and Aaron wanted
+aa <- createDataPartition(Create_AA$CreateOrNot, p = 0.8, list=FALSE)
+Create_tr_aa <- Create_AA[aa,]
+Create_test_aa<- Create_AA[-aa,]
+bb <- createDataPartition(Create_tr_aa$CreateOrNot,p = 0.8,list=FALSE)
+train_AA <- Create_tr_aa[bb,]
+valid_AA<- Create_tr_aa[-bb,]
+test_AA<- Create_test_aa
+train_h2o_AA <- as.h2o(train_AA)
+valid_h2o_AA <- as.h2o(valid_AA)
+test_h2o_AA <- as.h2o(test_AA)
+View(train_AA)
+y <- "CreateOrNot"
+x <- setdiff(names(train_h2o_AA), c(y, "OpportunityId18digits"))
+set.seed(1989)
+aml1 <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o_AA,
+validation_frame  = valid_h2o_AA,
+max_runtime_secs  = 999999999,
+max_models=18,
+seed=1
+)
+aml1
+set.seed(2000)
+aml2 <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o_AA,
+validation_frame  = valid_h2o_AA,
+max_runtime_secs  = 999999999,
+max_models=20,
+seed=1
+)
+aml2
+set.seed(2000)
+aml3 <- h2o.automl(
+x = x,
+y = y,
+training_frame    = train_h2o_AA,
+validation_frame  = valid_h2o_AA,
+max_runtime_secs  = 999999999,
+max_models=22,
+seed=1
+)
+aml3
+aml1@leader
+aml2@leader
+aml3@leader
+pred_aml1h2o <- h2o.predict( aml1@leader, newdata = test_h2o_AA)
+pred_aml2h2o <- h2o.predict( aml2@leader, newdata = test_h2o_AA)
+pred_aml3h2o <- h2o.predict( aml3@leader, newdata = test_h2o_AA)
+pred_aml1<- as.data.frame(pred_aml1h2o)
+pred_aml2<- as.data.frame(pred_aml2h2o)
+pred_aml3<- as.data.frame(pred_aml3h2o)
+View(lb)
+View(Merge_DF1)
+test_AA_aml1<- cbind(test_AA,pred_aml1)
+test_AA_aml2<- cbind(test_AA,pred_aml2)
+test_AA_aml3<- cbind(test_AA,pred_aml3)
+h2o.performance(model = aml1@leader, newdata = test_h2o_AA)
+aml2_perf<- h2o.performance(model = aml2@leader, newdata = test_h2o_AA)
+View(aml2_perf)
+aml2_perf
+aml3_perf<- h2o.performance(model = aml3@leader, newdata = test_h2o_AA)
+aml3_perf
+h2o.varimp_plot(aml1@leader)
+h2o.varimp_plot(aml2@leader)
+savehistory("~/Documents/AttributionModel/AttributionmodelFullDataSet/Rcode9-1-2019.Rhistory")
+lb <- aml1@leaderboard
+lb1 <- aml1@leaderboard
+lb2 <- aml2@leaderboard
+lb3 <- aml3@leaderboard
+lb1
+aml1@leader@model_id
+aml1@@model_id
+model_ids <- as.data.frame(aml@leaderboard$model_id)[,1]
+View(model_ids)
+m <- h2o.getModel(model_ids[2])
+m
+m1 <- h2o.getModel(model_ids[7])
+m1
+m2 <- h2o.getModel(model_ids[9])
+m2
+pred_h2o_AAGBM <- h2o.predict(h2o.getModel(model_ids[9]), newdata = test_h2o)
+h2o.varimp_plot(h2o.getModel(model_ids[9])
+)
+savehistory("~/Documents/AttributionModel/AttributionmodelFullDataSet/Rcode9-2.Rhistory")

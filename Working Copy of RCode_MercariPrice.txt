@@ -1,0 +1,284 @@
+> ### To clear the environment of R
+> rm(list=ls())
+> setwd("~/Mercari Price Suggestion Challenge")
+> tsvdata <- read.delim("train.tsv")
+> View(tsvdata)
+> tsv_DF<- as.data.frame(tsvdata)
+> str(tsv_DF)
+'data.frame':	593376 obs. of  8 variables:
+ $ train_id         : int  0 1 2 3 4 5 6 7 8 9 ...
+ $ name             : Factor w/ 518313 levels "' BARE WITH ME ' DOSE OF COLORS",..: 306711 395689 63583 247472 19749 111228 39991 187364 188046 382469 ...
+ $ item_condition_id: int  3 3 1 1 1 3 3 3 3 3 ...
+ $ category_name    : Factor w/ 1203 levels "","Beauty/Bath & Body/Bath",..: 742 87 1171 432 1098 1110 1170 817 817 950 ...
+ $ brand_name       : Factor w/ 3752 levels "","% Pure","10.Deep",..: 1 2813 3305 1 1 1 46 3141 2422 1 ...
+ $ price            : num  10 52 10 35 44 59 64 6 19 8 ...
+ $ shipping         : int  1 0 1 1 0 0 0 1 0 0 ...
+ $ item_description : Factor w/ 523255 levels "","'''Tis the season for rain! Never used just stored away. Flowers around the entire umbrella.",..: 336467 464129 52511 324968 160392 72552 417170 521113 204213 236581 ...
+> tsv_DF1<- tsv_DF
+> tsv_DF$name<-toupper(tsv_DF$name)
+> str(tsv_DF$name)
+ chr [1:593376] "MLB CINCINNATI REDS T SHIRT SIZE XL" "RAZER BLACKWIDOW CHROMA KEYBOARD" ...
+> tsv_DF$name<- as.factor(tsv_DF$name)
+> View(tsv_DF)
+> tsv_DF$category_name<- toupper(tsv_DF$category_name)
+> tsv_DF$category_name<- as.factor(tsv_DF$category_name)
+> tsv_DF$brand_name<- toupper(tsv_DF$brand_name)
+> tsv_DF$brand_name<- as.factor(tsv_DF$brand_name)
+> View(tsv_DF)
+> tsv_DF$item_description<- toupper(tsv_DF$item_description)
+> tsv_DF$item_description<- as.factor(tsv_DF$item_description)
+> install.packages("data.table")
+> library(data.table)
+> install.package("sqldf")
+> library(sqldf)
+> Unique_brand<-sqldf("select count(brand_name), brand_name from tsv_DF group by brand_name")
+> View(Unique_brand)
+> Unique_item_cond_id<-sqldf("select count(item_condition_id) as count, brand_name, item_condition_id from tsv_DF group by item_condition_id order by count desc")
+> View(Unique_item_cond_id)
+? unique_categories<- sqldf("select count(category_name) as count, category_name from tsv_DF group by category_name order by count desc")
+> View(unique_categories)
+
+> ### Let's do some plotting
+> plot(tsv_Df$item_condition_id, tsv_DF$price)
+> hist(tsv_DF$price)
+> histinfo<-hist(tsv_DF$price)
+> histinfo
+$breaks
+ [1]    0  100  200  300  400  500  600  700  800  900 1000 1100 1200 1300 1400 1500 1600 1700
+[19] 1800 1900 2000
+
+$counts
+ [1] 576613  12733   2501    789    303    153     82     68     41     23     17     11     10
+[14]      9      5      7      3      2      4      2
+
+$density
+ [1] 9.717498e-03 2.145857e-04 4.214865e-05 1.329680e-05 5.106374e-06 2.578466e-06 1.381923e-06
+ [8] 1.145985e-06 6.909615e-07 3.876126e-07 2.864963e-07 1.853799e-07 1.685272e-07 1.516745e-07
+[15] 8.426360e-08 1.179690e-07 5.055816e-08 3.370544e-08 6.741088e-08 3.370544e-08
+
+$mids
+ [1]   50  150  250  350  450  550  650  750  850  950 1050 1150 1250 1350 1450 1550 1650 1750
+[19] 1850 1950
+
+$xname
+[1] "tsv_DF$price"
+
+$equidist
+[1] TRUE
+
+attr(,"class")
+[1] "histogram"
+hist(tsv_DF$price, breaks=250, main='Breaks=250')
+
+> ### Let's do some text mining
+> ### # Transform and clean the text 
+> ### Let's create a copy of the text column
+> tsv_DF$category_nameR<- tsv_DF$category_name
+> docs <- Corpus(VectorSource(tsv_DF$category_nameR))
+# Convert the text to lower case
+> docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+> # Remove english common stopwords
+> docs <- tm_map(docs, removeWords, stopwords("english"))
+> # Remove punctuations
+> docs <- tm_map(docs, removePunctuation)
+> # Eliminate extra white spaces
+> docs <- tm_map(docs, stripWhitespace)
+> ### To stem text, we will need another library, known as SnowballC. 
+> ### Using the SnowballC library to stem text
+> library(SnowballC)
+> docs <- tm_map(docs, stemDocument)
+#turns the corpus into a document term matrix
+> dtm = DocumentTermMatrix(docs) 
+### extracts frequently occuring words
+
+### Let's try to do some feature engineering with the item_description column
+> tsv_DF$item_descriptionR<- tsv_DF$item_description
+> tsv_DF$item_descriptionR <- Corpus(VectorSource(tsv_DF$item_descriptionR))
+> tsv_DF$item_descriptionR <- tm_map(tsv_DF$item_descriptionR, content_transformer(tolower))
+> tsv_DF$item_descriptionR <- tm_map(tsv_DF$item_descriptionR, removeNumbers)
+> tsv_DF$item_descriptionR <- tm_map(tsv_DF$item_descriptionR, removeWords, stopwords("english"))
+> tsv_DF$item_descriptionR <- tm_map(tsv_DF$item_descriptionR, removePunctuation)
+> tsv_DF$item_descriptionR <- tm_map(tsv_DF$item_descriptionR, stripWhitespace)
+> dtm <- TermDocumentMatrix(tsv_DF$item_descriptionR)
+### The next statements did not work as I ran out of memory
+### m <- as.matrix(dtm)
+### v <- sort(rowSums(m),decreasing=TRUE)
+### d <- data.frame(word = names(v),freq=v)
+### head(d, 10)
+#### tm makes it very easy to create the term-document matrix. With the document term matrix made, we can then proceed to build a word cloud.
+> install.packages("wordcloud")
+
+> ### Let's recode the variables with some automated fashion
+> ### Copy the brand name
+> tsv_DF$brand_nameR<-tsv_DF$brand_name
+>### Let's change the blank values to NA
+> tsv_DF$brand_nameR[tsv_DF$brand_nameR==""] <- NA
+> ### Because it brand_nameR is a category it is better not to impute the missing values for this column
+> ### Data -set is huge so, I decided to take the complete cases for the brand names
+
+> Let's create another copy of the variable
+> tsv_DF$brand_nameR1<- tsv_DF$brand_nameR
+> tsv_DF$brand_nameR1 <- as.factor(tsv_DF$brand_nameR1)
+> tsv_DF1<-subset(tsv_DF,!(is.na(tsv_DF["brand_nameR"])))
+> ### Now examine Unique_brand to examine PINK has the highest frequeency 21,667
+> levels(tsv_DF$brand_nameR1) <- relevel(tsv_DF$brand_nameR1, ref = "PINK")
+> tsv_DF$brand_nameR1 <- as.numeric(tsv_DF$brand_nameR1)
+> ### Let's repeat the same thing for category_nameR
+> tsv_DF_R$category_nameR <- as.factor(tsv_DF_R$category_nameR)
+> levels(tsv_DF_R$category_nameR) <- relevel(tsv_DF_R$category_nameR, ref = "WOMEN/ATHLETIC APPAREL/PANTS, TIGHTS, LEGGINGS")
+> tsv_DF_R$category_nameR <- as.numeric(tsv_DF_R$category_nameR)
+> ### Now change the brandR and CategoryR to factor
+> ### Now take the price variable and take a log transform
+> ### Note that log(0) is infinite so add 1 with the price variable
+> tsv_DF_R$priceR<- log(1+tsv_DF_R$price)
+> ### Let's create a factor of the shipping variable
+> tsv_DF_R$shippingR<- as.factor(tsv_DF_R$shipping)
+> hist(tsv_DF_R$priceR)
+> ind <- sample(1:nrow(tsv_DF_R),238252)
+> trainDF1 <- tsv_DF_R[ind,]
+> testDF1 <- tsv_DF_R[-ind,]
+
+> ### Let's run a linear model priceR ~ item_condition_idR + brand_nameR1 + category_nameR1 + shippingR, data=trainDF1)
+> ### Run it in H20
+> ### Select all the needed columns
+> library(h2o)
+> h2o.init(ip="localhost", port=54321, max_mem_size="1250m")
+
+> tsv_DF2<- tsv_DF1[,c(9,10,11,14,16)]
+> View(tsv_DF2)
+> ind <- sample(1:nrow(tsv_DF2),238252)
+> trainDF1 <- tsv_DF2[ind,]
+> testDF1 <- tsv_DF2[-ind,]
+> y1 <- "priceR"
+> x1 <- setdiff(colnames(tsv_DF2),y1) 
+> ind <- sample(1:nrow(tsv_DF2),238252)
+> trainDF1 <- tsv_DF2[ind,]
+> testDF1 <- tsv_DF2[-ind,]
+> ### Run the linear regression
+> glm<- h2o.glm(training_frame = as.h2o(trainDF1), x = x1, y = y1, family = "gaussian", lambda = 0, missing_values_handling = "Skip", standardize = TRUE)
+> glm_prediction <- as.data.frame(predict(glm,as.h2o(testDF1)))
+> glm
+> summary(glm)
+> testDF2 <- cbind(testDF1,glm_prediction)
+> View(testDF2)
+> sum(testDF2$predict-testDF2$priceR)^2/nrow(testDF2)
+[1] 0.0625278
+> #### Now need to a backtransform
+> ### Create a copy of the predicted and actual columns
+> testDF2$priceR1<-testDF2$priceR
+> testDF2$predictR1<- testDF2$predict
+> testDF2$predictR1<- 10^(testDF2$predictR1)
+> testDF2$priceR1<- 10^(testDF2$priceR1)
+> sum(testDF2$predictR1-testDF2$priceR1)^2/nrow(testDF2)
+> 2.171847e+13
+
+#### Now Try with the full sample with missing values in the sample as H20 takes care of missing value data
+> tsv_DF$brand_nameR2<- as.factor(tsv_DF$brand_nameR1)
+> tsv_DF$category_nameR1 <- as.factor(tsv_DF$category_name)
+> levels(tsv_DF$category_nameR1) <- relevel(tsv_DF$category_nameR1, ref = "WOMEN/ATHLETIC APPAREL/PANTS, TIGHTS, LEGGINGS")
+> tsv_DF$category_nameR1 <- as.numeric(tsv_DF$category_nameR1)
+> tsv_DF$brand_nameR2<- as.factor(tsv_DF$brand_nameR1)
+tsv_DF$category_nameR2<- as.factor(tsv_DF$category_nameR1)
+> View(tsv_DF)
+> tsv_DF3<- tsv_DF[,c(9,10,11,15,16)]
+> y2 <- "priceR"
+> x2 <- setdiff(colnames(tsv_DF2),y2) 
+> ind <- sample(1:nrow(tsv_DF3),415364)
+> trainDF2 <- tsv_DF3[ind,]
+> testDF2 <- tsv_DF3[-ind,]
+> glm1<- h2o.glm(training_frame = as.h2o(trainDF2), x = x2, y = y2, family = "gaussian", lambda = 0, missing_values_handling = "Skip", standardize = TRUE)
+  |==============================================================================| 100%
+  |==============================================================================| 100%
+> glm1
+> glm_prediction1 <- as.data.frame(predict(glm1,as.h2o(testDF2)))
+
+### Now try with the integer variable from brand_name and category_name rather than factor
+> tsv_DF4<- tsv_DF[,c(9,10,11,13,14)]
+> y3 <- "priceR"
+> x3 <- setdiff(colnames(tsv_DF4),y3) 
+> ind <- sample(1:nrow(tsv_DF4),415364)
+> trainDF3 <- tsv_DF4[ind,]
+> testDF3 <- tsv_DF4[-ind,]
+> glm2<- h2o.glm(training_frame = as.h2o(trainDF3), x = x3, y = y3, family = "gaussian", lambda = 0, missing_values_handling = "Skip", standardize = TRUE)
+> glm_prediction2 <- as.data.frame(predict(glm2,as.h2o(testDF3)))
+
+### Now I have to figure out a way to do this with the actual supplied test set
+
+https://www.springboard.com/blog/text-mining-in-r/
+
+> ### Now try a DeepLearning Model
+> DT5Model <- h2o.deeplearning(x=x2, y=y2, seed=1234, training_frame= as.h2o(trainDF2), nfolds=5, stopping_rounds=5, epochs=350,variable_importances=T, overwrite_with_best_model=TRUE, activation= "Tanh", input_dropout_ratio= 0.1, hidden= c(30,30), l1=6e-4, loss="Automatic", distribution="AUTO", stopping_metric="RMSLE")
+
+m3 <- h2o.deeplearning(  model_id="dl_model_tuned",   training_frame=train_A,   validation_frame=valid_A,   x=1:4,  y=5,  overwrite_with_best_model=F,  
+  hidden=c(128,128,128),          ## more hidden layers -> more complex interactions
+  epochs=10,                      ## to keep it short enough
+  score_validation_samples=10000, ## downsample validation set for faster scoring
+  score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
+  adaptive_rate=F,                ## manually tuned learning rate
+  rate=0.01, 
+  rate_annealing=2e-6,            
+  momentum_start=0.2,             ## manually tuned momentum
+  momentum_stable=0.4, 
+  momentum_ramp=1e7, 
+  l1=1e-5,                        ## add some L1/L2 regularization
+  l2=1e-5,
+  max_w2=10                       ## helps stability for Rectifier
+) 
+
+> ### try some random forest
+### In this case, tsv_DFA contains brand_name and category_name as Factor
+### tsv_DFB contains brand_name and category_name as int
+
+> tsv_DFA<- tsv_DF[,c(11,12,13,14,15)]
+> tsv_DFB<- tsv_DF[,c(9,10,13,14,15)]
+tsv_DFAh2o<- as.h2o(tsv_DFA)
+ splits_A<- h2o.splitFrame(tsv_DFAh2o, c(0.6,0.2), seed=1234)
+> train_A<- h2o.assign(splits_A[[1]],"train.hex")
+> valid_A<- h2o.assign(splits_A[[2]],"valid.hex")
+> test_A<- h2o.assign(splits_A[[3]],"test.hex")
+>  rf1_factor<- h2o.randomForest(training_frame = train_A, validation_frame = valid_A, x=1:4, y=5, model_id= "rf_covType_v1", ntrees=50, stopping_rounds = 5, score_each_iteration = T,seed=200)
+> ### Let's do the prediction
+> rf1final_factor<-h2o.predict(object = rf1_factor, newdata = test_A)
+
+### Let's do the prediction for integer
+
+> splits_B<- h2o.splitFrame(tsv_DFBh2o, c(0.6,0.2), seed=1234)
+> train_B<- h2o.assign(splits_B[[1]],"train.hex")
+> valid_B<- h2o.assign(splits_B[[2]],"valid.hex")
+> test_B<- h2o.assign(splits_B[[3]],"test.hex")
+> rf1_int<- h2o.randomForest(training_frame = train_B, validation_frame = valid_B, x=1:4, y=5, model_id= "rf_covType_v1", ntrees=50, stopping_rounds = 5, score_each_iteration = T,seed=200)
+> rf1final_int<-h2o.predict(object = rf1_int, newdata = test_B)
+
+> ### Let's run some Gradient Boosting 
+> gbm_factor<- h2o.gbm(training_frame = train_A, validation_frame = valid_A, x=1:4,y=5,model_id= "gbm_covType_v1", ntrees=75, stopping_rounds = 5, score_each_iteration = T,seed=1000)
+> gbm_finalpredfactor<-h2o.predict(object = gbm_factor, newdata = test_A)
+
+> gbm_int<- h2o.gbm(training_frame = train_B, validation_frame = valid_B, x=1:4,y=5,model_id= "gbm_covType_v1", ntrees=75, stopping_rounds = 5, score_each_iteration = T,seed=1000)
+
+> gbm_finalpredint<-h2o.predict(object = gbm_int, newdata = test_B)
+
+How to build an ensamble model in H2o and R
+https://www.analyticsvidhya.com/blog/2017/02/introduction-to-ensembling-along-with-implementation-in-r/
+
+> my_gbm_fact <- h2o.gbm(x = 1:4,y = 5, training_frame = train_A, distribution = "gaussian", validation_frame = valid_A, ntrees = 10, max_depth = 3,  min_rows = 2,  learn_rate = 0.2, nfolds = nfolds,fold_assignment = "Modulo",keep_cross_validation_predictions = TRUE,  seed = 1)
+
+> my_rf <- h2o.randomForest(training_frame = train_B, validation_frame = valid_B, x=1:4, y=5, model_id= "rf_covType_v1", ntrees=50, nfolds = nfolds, fold_assignment = "Modulo",               keep_cross_validation_predictions = TRUE,seed = 1)
+
+ensemble <- h2o.stackedEnsemble(x = 1:4,y = 5, training_frame = train_A,validation_frame = valid_A, model_id = "my_ensemble",base_models = list(my_gbm_fact, my_rf))
+
+> ### GBM hyper parameter tune
+#### GBM hyperparameter 
+> learn_rate_opt <- c(0.01, 0.03)
+> max_depth_opt <- c(3, 4, 5, 6, 9)
+> sample_rate_opt <- c(0.7, 0.8, 0.9, 1.0)
+> col_sample_rate_opt <- c(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
+> hyper_params <- list(learn_rate = learn_rate_opt, max_depth = max_depth_opt, sample_rate = sample_rate_opt, col_sample_rate = col_sample_rate_opt)
+> search_criteria <- list(strategy = "RandomDiscrete", max_models = 3, seed = 1)
+> gbm_grid_fact<- h2o.grid(algorithm = "gbm", grid_id = "gbm_grid_gaussian", x = 1:4, y = 5,training_frame = train_A,validation_frame = valid_A,ntrees = 10,seed = 1, nfolds = nfolds,         fold_assignment = "Modulo",keep_cross_validation_predictions = TRUE,hyper_params = hyper_params, search_criteria = search_criteria)
+ensemble_grid <- h2o.stackedEnsemble(x = x, y = y,training_frame = train_A, alidation_frame = valid_B, model_id = "ensemble_gbm_grid_fact", base_models = gbm_grid_fact@model_ids)
+
+#### Trying to run the ensamble using Caret per example of analytics Vidya
+
+
